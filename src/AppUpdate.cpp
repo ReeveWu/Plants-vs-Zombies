@@ -20,7 +20,7 @@ void App::Update() {
         break;
 
     case Phase::GAMEPLAY:
-        // TODO: game logic will be added in later sub-tasks
+        UpdateGameplay();
         break;
 
     case Phase::LEVEL_COMPLETE:

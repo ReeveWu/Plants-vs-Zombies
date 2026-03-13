@@ -7,6 +7,11 @@
 
 #include "AnimatedCharacter.hpp"
 #include "Background.hpp"
+#include "CardSlot.hpp"
+#include "Sun.hpp"
+#include "SunCounter.hpp"
+
+#include "Util/GameObject.hpp"
 
 class App {
 public:
@@ -38,6 +43,9 @@ private:
     };
 
     void UpdateCamera();
+    void UpdateGameplay();
+    void SpawnSkySun();
+    void InitCards();
 
 private:
     State m_CurrentState = State::START;
@@ -48,12 +56,19 @@ private:
 
     // Game objects
     std::shared_ptr<Background> m_Background;
+    std::shared_ptr<Util::GameObject> m_CardBarBackground;
     std::shared_ptr<AnimatedCharacter> m_ReadyAnim;
 
-    // Camera system
-    // bg.x > 0 → background shifts right → shows more house (left side)
-    // bg.x < 0 → background shifts left  → shows more road  (right side)
-    // Safe range for 1280x720 window with 1680px bg: [-200, +200]
+    // Sun system
+    std::vector<std::shared_ptr<Sun>> m_Suns;
+    std::shared_ptr<SunCounter> m_SunCounter;
+    int m_SunAmount = 50;
+    int m_SunSpawnTimer = 0;
+
+    // Card system
+    std::vector<std::shared_ptr<CardSlot>> m_Cards;
+    std::shared_ptr<CardSlot> m_SelectedCard;
+
     float m_CameraOffset = 0.0f;
     int m_CameraTimer = 0;
 
@@ -61,6 +76,7 @@ private:
     static constexpr float CAMERA_IDLE_OFFSET = 180.0f;  // play position (house visible)
     static constexpr float CAMERA_PAN_TARGET = -150.0f;  // road-preview position
     static constexpr int CAMERA_PAUSE_FRAMES = 60;
+    static constexpr int SUN_SPAWN_INTERVAL = 350;
 };
 
 #endif

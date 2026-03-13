@@ -8,7 +8,7 @@ std::vector<std::string> Sun::GetFramePaths() {
     paths.reserve(12);
     for (int i = 0; i < 12; ++i) {
         paths.push_back(std::string(RESOURCE_DIR) +
-                        "/Plant/sun/sun_" + std::to_string(i) + ".png");
+                        "/Plant/sun/" + std::to_string(i) + ".png");
     }
     return paths;
 }

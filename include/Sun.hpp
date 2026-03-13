@@ -11,11 +11,8 @@
 class Sun : public Util::GameObject {
 public:
     enum class State { FALLING, IDLE, COLLECTING, DONE };
-
-    /// Sky sun: falls from above screen to a random target position
     explicit Sun(const glm::vec2& target);
 
-    /// Plant sun: emitted near a sunflower, drops slightly
     Sun(const glm::vec2& plantPos, bool fromPlant);
 
     void Update();

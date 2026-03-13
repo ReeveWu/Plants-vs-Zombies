@@ -66,6 +66,9 @@ void App::Start() {
     m_SunAmount = 50;
     m_SunSpawnTimer = 0;
     m_SelectedCard = nullptr;
+    m_HoldingPlant = nullptr;
+    m_HoldingCardIndex = -1;
+    m_PlantGrid = {};
 
     m_CurrentState = State::UPDATE;
 }

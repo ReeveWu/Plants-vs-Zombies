@@ -12,6 +12,8 @@ set(INCLUDE_FILES
     App.hpp
     AnimatedCharacter.hpp
     Background.hpp
+    GridSystem.hpp
+    Plant.hpp
     Sun.hpp
     SunCounter.hpp
     CardSlot.hpp

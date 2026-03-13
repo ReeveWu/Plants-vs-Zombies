@@ -8,10 +8,14 @@
 #include "AnimatedCharacter.hpp"
 #include "Background.hpp"
 #include "CardSlot.hpp"
+#include "GridSystem.hpp"
+#include "Plant.hpp"
 #include "Sun.hpp"
 #include "SunCounter.hpp"
 
 #include "Util/GameObject.hpp"
+
+#include <array>
 
 class App {
 public:
@@ -46,6 +50,8 @@ private:
     void UpdateGameplay();
     void SpawnSkySun();
     void InitCards();
+    void PlacePlant(int row, int col);
+    void CancelHolding();
 
 private:
     State m_CurrentState = State::START;
@@ -68,6 +74,11 @@ private:
     // Card system
     std::vector<std::shared_ptr<CardSlot>> m_Cards;
     std::shared_ptr<CardSlot> m_SelectedCard;
+
+    // Plant grid & drag state
+    std::array<std::array<std::shared_ptr<Plant>, GridSystem::COLS>, GridSystem::ROWS> m_PlantGrid{};
+    std::shared_ptr<Plant> m_HoldingPlant;
+    int m_HoldingCardIndex = -1;
 
     float m_CameraOffset = 0.0f;
     int m_CameraTimer = 0;

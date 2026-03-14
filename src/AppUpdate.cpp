@@ -8,6 +8,7 @@ void App::Update() {
     switch (m_Phase) {
     case Phase::INTRO_CAMERA:
         UpdateCamera();
+        InitLawnMowers();
         break;
 
     case Phase::READY_ANIM:
@@ -34,4 +35,18 @@ void App::Update() {
     }
 
     m_Root.Update();
+}
+
+void App::InitLawnMowers() {
+    for (int row = 0; row < GridSystem::ROWS; ++row) {
+        if (m_LawnMowers[row]) {
+            m_Root.RemoveChild(m_LawnMowers[row]);
+        }
+        float y = GridSystem::CellToPosition(row, 0).y - 20.0f;
+        auto mower = std::make_shared<LawnMower>(
+            glm::vec2{LAWNMOWER_X + m_CameraOffset, y});
+        mower->SetZIndex(5);
+        m_LawnMowers[row] = mower;
+        m_Root.AddChild(mower);
+    }
 }

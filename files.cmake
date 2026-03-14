@@ -12,7 +12,9 @@ set(INCLUDE_FILES
     App.hpp
     AnimatedCharacter.hpp
     Background.hpp
+    Bullet.hpp
     GridSystem.hpp
+    LawnMower.hpp
     NormalZombie.hpp
     Plant.hpp
     Zombie.hpp

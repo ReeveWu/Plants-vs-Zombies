@@ -7,8 +7,10 @@
 
 #include "AnimatedCharacter.hpp"
 #include "Background.hpp"
+#include "Bullet.hpp"
 #include "CardSlot.hpp"
 #include "GridSystem.hpp"
+#include "LawnMower.hpp"
 #include "NormalZombie.hpp"
 #include "Plant.hpp"
 #include "Sun.hpp"
@@ -55,6 +57,11 @@ private:
     void CancelHolding();
     void SpawnZombie();
     void UpdateZombies();
+    void UpdateBullets();
+    void UpdatePlantShooting();
+    void UpdateZombieEating();
+    void UpdateLawnMowers();
+    void InitLawnMowers();
 
 private:
     State m_CurrentState = State::START;
@@ -90,6 +97,13 @@ private:
     static constexpr int ZOMBIE_SPAWN_INTERVAL = 600;
     static constexpr int ZOMBIES_PER_LEVEL = 10;
     static constexpr float ZOMBIE_LOSE_X = -600.0f;
+
+    // Bullet system
+    std::vector<std::shared_ptr<Bullet>> m_Bullets;
+
+    // LawnMower system
+    std::array<std::shared_ptr<LawnMower>, GridSystem::ROWS> m_LawnMowers{};
+    static constexpr float LAWNMOWER_X = -560.0f;
 
     float m_CameraOffset = 0.0f;
     int m_CameraTimer = 0;

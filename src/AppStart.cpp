@@ -72,6 +72,7 @@ void App::Start() {
     m_Zombies.clear();
     m_ZombieSpawnTimer = 0;
     m_ZombiesSpawned = 0;
+    m_Bullets.clear();
 
     m_CurrentState = State::UPDATE;
 }

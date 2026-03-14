@@ -94,8 +94,12 @@ void App::UpdateGameplay() {
         SpawnZombie();
         m_ZombieSpawnTimer = 0;
     }
-
+    
+    UpdatePlantShooting();
+    UpdateBullets();
+    UpdateZombieEating();
     UpdateZombies();
+    UpdateLawnMowers();
 }
 
 void App::PlacePlant(int row, int col) {
@@ -161,12 +165,146 @@ void App::UpdateZombies() {
     m_Zombies.erase(
         std::remove_if(m_Zombies.begin(), m_Zombies.end(),
             [&](const std::shared_ptr<Zombie>& z) {
-                if (z->IsPastLine(ZOMBIE_LOSE_X)) {
+                if (z->IsDead() || z->IsPastLine(ZOMBIE_LOSE_X)) {
                     m_Root.RemoveChild(z);
-                    LOG_DEBUG("Zombie passed the line! (row {})", z->GetRow());
                     return true;
                 }
                 return false;
             }),
         m_Zombies.end());
+}
+
+void App::UpdatePlantShooting() {
+    for (int row = 0; row < GridSystem::ROWS; ++row) {
+        for (int col = 0; col < GridSystem::COLS; ++col) {
+            auto& plant = m_PlantGrid[row][col];
+            if (!plant || !plant->CanShoot()) continue;
+
+            // Only shoot if there's a zombie ahead in the same row
+            bool zombieAhead = false;
+            for (const auto& z : m_Zombies) {
+                if (z->GetRow() == row && z->IsAlive()
+                    && z->GetX() > plant->m_Transform.translation.x) {
+                    zombieAhead = true;
+                    break;
+                }
+            }
+            if (!zombieAhead) continue;
+
+            if (plant->TryShoot()) {
+                glm::vec2 bulletPos = plant->m_Transform.translation;
+                bulletPos.x += 30.0f;
+                bulletPos.y += 20.0f;
+                auto bullet = std::make_shared<Bullet>(bulletPos);
+                bullet->SetRow(row);
+                m_Bullets.push_back(bullet);
+                m_Root.AddChild(bullet);
+            }
+        }
+    }
+}
+
+void App::UpdateBullets() {
+    for (auto& bullet : m_Bullets) {
+        bullet->Update();
+    }
+
+    // Check bullet-zombie collisions
+    for (auto& bullet : m_Bullets) {
+        if (bullet->IsHit()) continue;
+        for (auto& zombie : m_Zombies) {
+            if (!zombie->IsAlive()) continue;
+            if (zombie->GetRow() != bullet->GetRow()) continue;
+            if (bullet->HitCheck(zombie->m_Transform.translation)) {
+                zombie->TakeDamage(bullet->GetDamage());
+                bullet->MarkHit();
+                break;
+            }
+        }
+    }
+
+    // Remove dead bullets
+    m_Bullets.erase(
+        std::remove_if(m_Bullets.begin(), m_Bullets.end(),
+            [&](const std::shared_ptr<Bullet>& b) {
+                if (b->IsHit() || b->IsOffScreen()) {
+                    m_Root.RemoveChild(b);
+                    return true;
+                }
+                return false;
+            }),
+        m_Bullets.end());
+}
+
+void App::UpdateZombieEating() {
+    for (auto& zombie : m_Zombies) {
+        if (!zombie->IsAlive()) continue;
+
+        int row = zombie->GetRow();
+        bool foundPlant = false;
+
+        for (int col = 0; col < GridSystem::COLS; ++col) {
+            auto& plant = m_PlantGrid[row][col];
+            if (!plant) continue;
+
+            float dx = zombie->GetX()
+                       - plant->m_Transform.translation.x;
+            if (dx >= -5.0f && dx <= 40.0f) {
+                foundPlant = true;
+                zombie->StartEat();
+
+                if (zombie->ShouldDealEatDamage()) {
+                    plant->Hurt();
+                    if (plant->IsDead()) {
+                        m_Root.RemoveChild(plant);
+                        plant = nullptr;
+                        zombie->StartWalk();
+                        LOG_DEBUG("Plant eaten at row {} col {}", row, col);
+                    }
+                }
+                break;
+            }
+        }
+
+        if (!foundPlant && zombie->IsEating()) {
+            zombie->StartWalk();
+        }
+    }
+}
+
+void App::UpdateLawnMowers() {
+    for (int row = 0; row < GridSystem::ROWS; ++row) {
+        auto& mower = m_LawnMowers[row];
+        if (!mower) continue;
+
+        // Trigger mower if idle zombie reaches it
+        if (mower->GetState() == LawnMower::State::IDLE) {
+            for (auto& zombie : m_Zombies) {
+                if (!zombie->IsAlive() || zombie->GetRow() != row) continue;
+                if (zombie->GetX() <= mower->m_Transform.translation.x + 30.0f) {
+                    mower->Trigger();
+                    LOG_DEBUG("LawnMower triggered in row {}", row);
+                    break;
+                }
+            }
+        }
+
+        mower->Update();
+
+        // Kill zombies in path
+        if (mower->GetState() == LawnMower::State::MOVING) {
+            for (auto& zombie : m_Zombies) {
+                if (!zombie->IsAlive() || zombie->GetRow() != row) continue;
+                if (mower->HitCheck(zombie->m_Transform.translation)) {
+                    zombie->TakeDamage(9999);
+                }
+            }
+        }
+
+        // Remove off-screen mower
+        if (mower->IsOffScreen()) {
+            m_Root.RemoveChild(mower);
+            mower = nullptr;
+        }
+    }
 }

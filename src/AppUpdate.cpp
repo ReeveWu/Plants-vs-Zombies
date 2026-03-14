@@ -25,7 +25,17 @@ void App::Update() {
         break;
 
     case Phase::LEVEL_COMPLETE:
-        // TODO: level completion logic
+        ++m_EndTimer;
+        if (m_EndTimer >= END_SCREEN_DURATION) {
+            m_CurrentState = State::END;
+        }
+        break;
+
+    case Phase::GAME_OVER:
+        ++m_EndTimer;
+        if (m_EndTimer >= END_SCREEN_DURATION) {
+            m_CurrentState = State::END;
+        }
         break;
     }
 

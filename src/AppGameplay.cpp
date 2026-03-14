@@ -94,12 +94,13 @@ void App::UpdateGameplay() {
         SpawnZombie();
         m_ZombieSpawnTimer = 0;
     }
-    
+
     UpdatePlantShooting();
     UpdateBullets();
     UpdateZombieEating();
     UpdateZombies();
     UpdateLawnMowers();
+    CheckWinLose();
 }
 
 void App::PlacePlant(int row, int col) {
@@ -306,5 +307,39 @@ void App::UpdateLawnMowers() {
             m_Root.RemoveChild(mower);
             mower = nullptr;
         }
+    }
+}
+
+void App::CheckWinLose() {
+    // Lose: any zombie past the line with no lawnmower left
+    for (auto& zombie : m_Zombies) {
+        if (!zombie->IsAlive()) continue;
+        int row = zombie->GetRow();
+        bool hasMower = m_LawnMowers[row] != nullptr;
+        if (!hasMower && zombie->IsPastLine(ZOMBIE_LOSE_X+m_CameraOffset)) {
+            LOG_DEBUG("Game Over! Zombie reached the house in row {}", row);
+            m_EndScreen = std::make_shared<Util::GameObject>(
+                std::make_shared<Util::Image>(
+                    RESOURCE_DIR "/LevelCompleted/lose/0.png"),
+                100.0f);
+            m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+            m_Root.AddChild(m_EndScreen);
+            m_EndTimer = 0;
+            m_Phase = Phase::GAME_OVER;
+            return;
+        }
+    }
+
+    // Win: all zombies spawned and none alive
+    if (m_ZombiesSpawned >= ZOMBIES_PER_LEVEL && m_Zombies.empty()) {
+        LOG_DEBUG("Level Complete! All zombies defeated.");
+        m_EndScreen = std::make_shared<Util::GameObject>(
+            std::make_shared<Util::Image>(
+                RESOURCE_DIR "/LevelCompleted/lose/0.png"),
+            100.0f);
+        m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+        m_Root.AddChild(m_EndScreen);
+        m_EndTimer = 0;
+        m_Phase = Phase::LEVEL_COMPLETE;
     }
 }

@@ -17,6 +17,7 @@
 #include "SunCounter.hpp"
 
 #include "Util/GameObject.hpp"
+#include "Util/Text.hpp"
 
 #include <array>
 
@@ -40,6 +41,7 @@ private:
         READY_ANIM,
         GAMEPLAY,
         LEVEL_COMPLETE,
+        GAME_OVER,
     };
 
     enum class CameraState {
@@ -62,6 +64,7 @@ private:
     void UpdateZombieEating();
     void UpdateLawnMowers();
     void InitLawnMowers();
+    void CheckWinLose();
 
 private:
     State m_CurrentState = State::START;
@@ -104,6 +107,11 @@ private:
     // LawnMower system
     std::array<std::shared_ptr<LawnMower>, GridSystem::ROWS> m_LawnMowers{};
     static constexpr float LAWNMOWER_X = -560.0f;
+
+    // End-game UI
+    std::shared_ptr<Util::GameObject> m_EndScreen;
+    int m_EndTimer = 0;
+    static constexpr int END_SCREEN_DURATION = 180;
 
     float m_CameraOffset = 0.0f;
     int m_CameraTimer = 0;

@@ -9,6 +9,7 @@
 #include "Background.hpp"
 #include "CardSlot.hpp"
 #include "GridSystem.hpp"
+#include "NormalZombie.hpp"
 #include "Plant.hpp"
 #include "Sun.hpp"
 #include "SunCounter.hpp"
@@ -52,6 +53,8 @@ private:
     void InitCards();
     void PlacePlant(int row, int col);
     void CancelHolding();
+    void SpawnZombie();
+    void UpdateZombies();
 
 private:
     State m_CurrentState = State::START;
@@ -79,6 +82,14 @@ private:
     std::array<std::array<std::shared_ptr<Plant>, GridSystem::COLS>, GridSystem::ROWS> m_PlantGrid{};
     std::shared_ptr<Plant> m_HoldingPlant;
     int m_HoldingCardIndex = -1;
+
+    // Zombie system
+    std::vector<std::shared_ptr<Zombie>> m_Zombies;
+    int m_ZombieSpawnTimer = 0;
+    int m_ZombiesSpawned = 0;
+    static constexpr int ZOMBIE_SPAWN_INTERVAL = 600;
+    static constexpr int ZOMBIES_PER_LEVEL = 10;
+    static constexpr float ZOMBIE_LOSE_X = -600.0f;
 
     float m_CameraOffset = 0.0f;
     int m_CameraTimer = 0;

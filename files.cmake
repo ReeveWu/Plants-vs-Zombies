@@ -13,7 +13,9 @@ set(INCLUDE_FILES
     AnimatedCharacter.hpp
     Background.hpp
     GridSystem.hpp
+    NormalZombie.hpp
     Plant.hpp
+    Zombie.hpp
     Sun.hpp
     SunCounter.hpp
     CardSlot.hpp

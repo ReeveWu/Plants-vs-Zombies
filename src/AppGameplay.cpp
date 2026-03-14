@@ -86,6 +86,16 @@ void App::UpdateGameplay() {
             CancelHolding();
         }
     }
+
+    // Zombie spawning
+    ++m_ZombieSpawnTimer;
+    if (m_ZombieSpawnTimer >= ZOMBIE_SPAWN_INTERVAL
+        && m_ZombiesSpawned < ZOMBIES_PER_LEVEL) {
+        SpawnZombie();
+        m_ZombieSpawnTimer = 0;
+    }
+
+    UpdateZombies();
 }
 
 void App::PlacePlant(int row, int col) {
@@ -128,4 +138,35 @@ void App::SpawnSkySun() {
     m_Suns.push_back(sun);
     m_Root.AddChild(sun);
     LOG_DEBUG("Sky sun spawned at target ({}, {})", x, y);
+}
+
+void App::SpawnZombie() {
+    int row = rand() % GridSystem::ROWS;
+    float yPos = GridSystem::CellToPosition(row, GridSystem::COLS - 1).y;
+
+    auto zombie = std::make_shared<NormalZombie>(row);
+    zombie->SetZIndex(15);
+    zombie->m_Transform.translation = {620.0f + m_CameraOffset, yPos};
+    m_Zombies.push_back(zombie);
+    m_Root.AddChild(zombie);
+    ++m_ZombiesSpawned;
+    LOG_DEBUG("Zombie spawned in row {} (total: {})", row, m_ZombiesSpawned);
+}
+
+void App::UpdateZombies() {
+    for (auto& zombie : m_Zombies) {
+        zombie->Update();
+    }
+
+    m_Zombies.erase(
+        std::remove_if(m_Zombies.begin(), m_Zombies.end(),
+            [&](const std::shared_ptr<Zombie>& z) {
+                if (z->IsPastLine(ZOMBIE_LOSE_X)) {
+                    m_Root.RemoveChild(z);
+                    LOG_DEBUG("Zombie passed the line! (row {})", z->GetRow());
+                    return true;
+                }
+                return false;
+            }),
+        m_Zombies.end());
 }

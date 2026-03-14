@@ -69,6 +69,9 @@ void App::Start() {
     m_HoldingPlant = nullptr;
     m_HoldingCardIndex = -1;
     m_PlantGrid = {};
+    m_Zombies.clear();
+    m_ZombieSpawnTimer = 0;
+    m_ZombiesSpawned = 0;
 
     m_CurrentState = State::UPDATE;
 }

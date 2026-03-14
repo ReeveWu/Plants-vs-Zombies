@@ -8,7 +8,7 @@ class SunCounter : public Util::GameObject {
 public:
     SunCounter() {
         auto text = std::make_shared<Util::Text>(
-            RESOURCE_DIR "/Background/Font/Geo-Regular.ttf", 20,
+            RESOURCE_DIR "/Font/Geo-Regular.ttf", 20,
             "50", Util::Color(0, 0, 0));
         SetDrawable(text);
         SetZIndex(80);

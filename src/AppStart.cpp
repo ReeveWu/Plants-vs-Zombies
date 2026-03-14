@@ -7,22 +7,22 @@
 void App::InitCards() {
     // Plant data: cost, cooldown frames, card image, CD image
     const PlantInfo plantData[] = {
-        {100, 450, RESOURCE_DIR "/Background/Card/bright/peashooter.png",
-                    RESOURCE_DIR "/Background/Card/dark/peashooter.png"},
-        { 50, 450, RESOURCE_DIR "/Background/Card/bright/sunflower.png",
-                    RESOURCE_DIR "/Background/Card/dark/sunflower.png"},
-        {150, 2000, RESOURCE_DIR "/Background/Card/bright/cherrybomb.png",
-                    RESOURCE_DIR "/Background/Card/dark/cherrybomb.png"},
-        { 50, 1800, RESOURCE_DIR "/Background/Card/bright/wallnut.png",
-                    RESOURCE_DIR "/Background/Card/dark/wallnut.png"},
-        { 25, 1800, RESOURCE_DIR "/Background/Card/bright/mine.png",
-                    RESOURCE_DIR "/Background/Card/dark/mine.png"},
-        {175, 450, RESOURCE_DIR "/Background/Card/bright/iceshooter.png",
-                    RESOURCE_DIR "/Background/Card/dark/iceshooter.png"},
-        {150, 450, RESOURCE_DIR "/Background/Card/bright/chomper.png",
-                    RESOURCE_DIR "/Background/Card/dark/chomper.png"},
-        {200, 450, RESOURCE_DIR "/Background/Card/bright/fastshooter.png",
-                    RESOURCE_DIR "/Background/Card/dark/fastshooter.png"},
+        {100, 450, RESOURCE_DIR "/Card/bright/peashooter.png",
+                    RESOURCE_DIR "/Card/dark/peashooter.png"},
+        { 50, 450, RESOURCE_DIR "/Card/bright/sunflower.png",
+                    RESOURCE_DIR "/Card/dark/sunflower.png"},
+        {150, 2000, RESOURCE_DIR "/Card/bright/cherrybomb.png",
+                    RESOURCE_DIR "/Card/dark/cherrybomb.png"},
+        { 50, 1800, RESOURCE_DIR "/Card/bright/wallnut.png",
+                    RESOURCE_DIR "/Card/dark/wallnut.png"},
+        { 25, 1800, RESOURCE_DIR "/Card/bright/mine.png",
+                    RESOURCE_DIR "/Card/dark/mine.png"},
+        {175, 450, RESOURCE_DIR "/Card/bright/iceshooter.png",
+                    RESOURCE_DIR "/Card/dark/iceshooter.png"},
+        {150, 450, RESOURCE_DIR "/Card/bright/chomper.png",
+                    RESOURCE_DIR "/Card/dark/chomper.png"},
+        {200, 450, RESOURCE_DIR "/Card/bright/fastshooter.png",
+                    RESOURCE_DIR "/Card/dark/fastshooter.png"},
     };
 
     constexpr float startX = -500.0f;

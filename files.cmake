@@ -18,6 +18,7 @@ set(INCLUDE_FILES
     NormalZombie.hpp
     Plant.hpp
     Zombie.hpp
+    ZombieCorpse.hpp
     Sun.hpp
     SunCounter.hpp
     CardSlot.hpp

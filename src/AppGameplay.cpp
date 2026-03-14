@@ -100,6 +100,7 @@ void App::UpdateGameplay() {
     UpdateZombieEating();
     UpdateZombies();
     UpdateLawnMowers();
+    UpdateDeathAnims();
     CheckWinLose();
 }
 
@@ -166,7 +167,12 @@ void App::UpdateZombies() {
     m_Zombies.erase(
         std::remove_if(m_Zombies.begin(), m_Zombies.end(),
             [&](const std::shared_ptr<Zombie>& z) {
-                if (z->IsDead() || z->IsPastLine(ZOMBIE_LOSE_X)) {
+                if (z->IsDead()) {
+                    SpawnDeathAnims(z);
+                    m_Root.RemoveChild(z);
+                    return true;
+                }
+                if (z->IsPastLine(ZOMBIE_LOSE_X)) {
                     m_Root.RemoveChild(z);
                     return true;
                 }
@@ -342,4 +348,34 @@ void App::CheckWinLose() {
         m_EndTimer = 0;
         m_Phase = Phase::LEVEL_COMPLETE;
     }
+}
+
+void App::SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie) {
+    glm::vec2 pos = zombie->m_Transform.translation;
+
+    auto body = std::make_shared<ZombieCorpse>(
+        zombie->GetDieBodyFrames(), pos);
+    body->SetZIndex(14);
+    m_DeathAnims.push_back(body);
+    m_Root.AddChild(body);
+
+    auto head = std::make_shared<ZombieCorpse>(
+        zombie->GetDieHeadFrames(),
+        glm::vec2{pos.x + 20.0f, pos.y + 40.0f});
+    head->SetZIndex(16);
+    m_DeathAnims.push_back(head);
+    m_Root.AddChild(head);
+}
+
+void App::UpdateDeathAnims() {
+    m_DeathAnims.erase(
+        std::remove_if(m_DeathAnims.begin(), m_DeathAnims.end(),
+            [&](const std::shared_ptr<ZombieCorpse>& anim) {
+                if (anim->IsFinished()) {
+                    m_Root.RemoveChild(anim);
+                    return true;
+                }
+                return false;
+            }),
+        m_DeathAnims.end());
 }

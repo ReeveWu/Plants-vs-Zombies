@@ -15,6 +15,7 @@
 #include "Plant.hpp"
 #include "Sun.hpp"
 #include "SunCounter.hpp"
+#include "ZombieCorpse.hpp"
 
 #include "Util/GameObject.hpp"
 #include "Util/Text.hpp"
@@ -65,6 +66,8 @@ private:
     void UpdateLawnMowers();
     void InitLawnMowers();
     void CheckWinLose();
+    void UpdateDeathAnims();
+    void SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie);
 
 private:
     State m_CurrentState = State::START;
@@ -103,6 +106,9 @@ private:
 
     // Bullet system
     std::vector<std::shared_ptr<Bullet>> m_Bullets;
+
+    // Death animation system
+    std::vector<std::shared_ptr<ZombieCorpse>> m_DeathAnims;
 
     // LawnMower system
     std::array<std::shared_ptr<LawnMower>, GridSystem::ROWS> m_LawnMowers{};

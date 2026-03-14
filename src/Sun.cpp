@@ -19,7 +19,7 @@ Sun::Sun(const glm::vec2& target)
     auto anim = std::make_shared<Util::Animation>(
         GetFramePaths(), true, 100, true, 0);
     SetDrawable(anim);
-    SetZIndex(100);
+    SetZIndex(90);
     m_Transform.scale = {0.8f, 0.8f};
     m_Transform.translation = {target.x, 400.0f};
     m_State = State::FALLING;
@@ -32,7 +32,7 @@ Sun::Sun(const glm::vec2& plantPos, bool)
     auto anim = std::make_shared<Util::Animation>(
         GetFramePaths(), true, 100, true, 0);
     SetDrawable(anim);
-    SetZIndex(100);
+    SetZIndex(90);
     m_Transform.scale = {0.8f, 0.8f};
     m_Transform.translation = {plantPos.x, plantPos.y + 20.0f};
     m_State = State::FALLING;

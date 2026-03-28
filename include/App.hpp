@@ -140,7 +140,7 @@ private:
     static constexpr float CAMERA_IDLE_OFFSET = 180.0f;  // play position (house visible)
     static constexpr float CAMERA_PAN_TARGET = -150.0f;  // road-preview position
     static constexpr int CAMERA_PAUSE_FRAMES = 60;
-    static constexpr int SUN_SPAWN_INTERVAL = 350;
+    static constexpr int SUN_SPAWN_INTERVAL = 300;
 };
 
 #endif

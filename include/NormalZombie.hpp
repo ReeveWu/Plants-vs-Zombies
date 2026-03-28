@@ -13,21 +13,29 @@ public:
     static constexpr int EAT_DAMAGE = 100;
 
     std::vector<std::string> GetDieBodyFrames() const override {
-        return MakeFrames("/Zombie/normal/die/body/", 10);
+        return MakeFrames("/Zombie/normal/idle/die/body/", 10);
     }
 
     std::vector<std::string> GetDieHeadFrames() const override {
-        return MakeFrames("/Zombie/normal/die/head/", 12);
+        return MakeFrames("/Zombie/normal/idle/die/head/", 12);
     }
 
 private:
     static std::vector<ArmorPhase> BuildPhases() {
         return {{
             0,
-            MakeFrames("/Zombie/normal/walk/normal/", 46),
-            MakeFrames("/Zombie/normal/eat/normal/", 39),
-            MakeFrames("/Zombie/normal/walk/hit/", 46),
-            MakeFrames("/Zombie/normal/eat/hit/", 39),
+            {{"idle", {
+                MakeFrames("/Zombie/normal/idle/walk/normal/", 46),
+                MakeFrames("/Zombie/normal/idle/eat/normal/", 39),
+                MakeFrames("/Zombie/normal/idle/walk/hit/", 46),
+                MakeFrames("/Zombie/normal/idle/eat/hit/", 39),
+            }},
+            {"frozen", {
+                MakeFrames("/Zombie/normal/frozen/walk/normal/", 46),
+                MakeFrames("/Zombie/normal/frozen/eat/normal/", 39),
+                MakeFrames("/Zombie/normal/frozen/walk/hit/", 46),
+                MakeFrames("/Zombie/normal/frozen/eat/hit/", 39),
+            }}},
         }};
     }
 };

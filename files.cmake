@@ -26,6 +26,7 @@ set(INCLUDE_FILES
     Sunflower.hpp
     Wallnut.hpp
     Zombie.hpp
+    StatusEffect.hpp
     ZombieCorpse.hpp
     Sun.hpp
     SunCounter.hpp

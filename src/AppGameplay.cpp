@@ -1,11 +1,13 @@
 #include "App.hpp"
 
+#include "StatusEffect.hpp"
 #include "Util/Input.hpp"
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 
 #include <algorithm>
 #include <cstdlib>
+#include <memory>
 
 void App::UpdateGameplay() {
     // Spawn sky suns periodically
@@ -155,7 +157,8 @@ void App::SpawnZombie() {
     std::shared_ptr<Zombie> zombie;
     int roll = rand() % 100;
     if (roll < 40) {
-        zombie = std::make_shared<NormalZombie>(row);
+        zombie = std::make_shared<FlagZombie>(row);
+        // zombie = std::make_shared<NormalZombie>(row);
     } else if (roll < 60) {
         zombie = std::make_shared<FlagZombie>(row);
     } else if (roll < 85) {
@@ -255,6 +258,10 @@ void App::UpdateBullets() {
             if (zombie->GetRow() != bullet->GetRow()) continue;
             if (bullet->HitCheck(zombie->m_Transform.translation)) {
                 zombie->TakeDamage(bullet->GetDamage());
+                if (bullet->IsIce()) {
+                    zombie->ApplyEffect(
+                        std::make_unique<FrostEffect>());
+                }
                 bullet->MarkHit();
                 break;
             }

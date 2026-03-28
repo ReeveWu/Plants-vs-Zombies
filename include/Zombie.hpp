@@ -3,20 +3,37 @@
 
 #include "AnimatedCharacter.hpp"
 #include "GridSystem.hpp"
+#include "StatusEffect.hpp"
 #include "Util/Animation.hpp"
 
+#include <algorithm>
+#include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
-// Represents one visual stage of a zombie's armor/appearance.
-// Phases are ordered strongest → weakest; the last phase (hpThreshold=0)
-// is the "naked" zombie look.
-struct ArmorPhase {
-    int hpThreshold;  // Phase active while HP > hpThreshold
+// Four frame lists for one (phase × variant) cell.
+struct VariantFrames {
     std::vector<std::string> walkFrames;
     std::vector<std::string> eatFrames;
     std::vector<std::string> walkHitFrames;
     std::vector<std::string> eatHitFrames;
+};
+
+// Represents one visual stage of a zombie's armor/appearance.
+// Phases are ordered strongest → weakest; the last phase (hpThreshold=0)
+// is the "naked" zombie look.
+// Each phase carries multiple variants keyed by name ("idle", "frozen", …).
+struct ArmorPhase {
+    int hpThreshold;  // Phase active while HP > hpThreshold
+    std::unordered_map<std::string, VariantFrames> variants;
+
+    // Convenience: look up a variant, fall back to "idle" if missing.
+    const VariantFrames& GetFrames(const std::string& variant) const {
+        auto it = variants.find(variant);
+        if (it != variants.end()) return it->second;
+        return variants.at("idle");
+    }
 };
 
 class Zombie : public AnimatedCharacter {
@@ -24,16 +41,47 @@ public:
     enum class State { WALK, EAT, DIE };
 
     Zombie(std::vector<ArmorPhase> phases,
-           int row, float speed, int hp, int eatDamage)
-        : AnimatedCharacter(phases[0].walkFrames, true, 45, true, 100),
+           int row, float speed, int hp, int eatDamage, int interval = 45)
+        : AnimatedCharacter(
+              phases[0].GetFrames("idle").walkFrames, true, interval, true, 100),
           m_Phases(std::move(phases)),
-          m_Row(row), m_Speed(speed), m_HP(hp), m_EatDamage(eatDamage) {
+          m_Row(row), m_BaseSpeed(speed), m_Speed(speed),
+          m_HP(hp), m_EatDamage(eatDamage), m_AnimInterval(interval) {
         m_Transform.scale = {0.9f, 0.9f};
     }
 
     virtual ~Zombie() = default;
 
+    // --- Effect system ---------------------------------------------------
+
+    void ApplyEffect(std::unique_ptr<StatusEffect> effect) {
+        // Check if same variant already active: refresh instead of stack
+        std::string newVar = effect->GetVariant();
+        for (auto& e : m_Effects) {
+            if (e->GetVariant() == newVar) {
+                e = std::move(effect); // replace / refresh
+                RefreshEffectState();
+                return;
+            }
+        }
+        m_Effects.push_back(std::move(effect));
+        RefreshEffectState();
+    }
+
+    // --- Per-frame update ------------------------------------------------
+
     void Update() {
+        // Tick effects & remove expired ones
+        bool effectsChanged = false;
+        m_Effects.erase(
+            std::remove_if(m_Effects.begin(), m_Effects.end(),
+                [&](std::unique_ptr<StatusEffect>& e) {
+                    if (!e->Tick()) { effectsChanged = true; return true; }
+                    return false;
+                }),
+            m_Effects.end());
+        if (effectsChanged) RefreshEffectState();
+
         if (m_State == State::WALK) {
             m_Transform.translation.x -= m_Speed;
         }
@@ -44,11 +92,11 @@ public:
         if (m_HitFlashTimer > 0) {
             --m_HitFlashTimer;
             if (m_HitFlashTimer == 0) {
-                const auto& phase = m_Phases[m_PhaseIndex];
+                const auto& vf = CurrentFrames();
                 if (m_State == State::WALK) {
-                    SwitchAnimation(phase.walkFrames);
+                    SwitchAnimation(vf.walkFrames);
                 } else if (m_State == State::EAT) {
-                    SwitchAnimation(phase.eatFrames);
+                    SwitchAnimation(vf.eatFrames);
                 }
             }
         }
@@ -71,11 +119,11 @@ public:
 
         // Hit flash with current phase's hit variant
         m_HitFlashTimer = HIT_FLASH_DURATION;
-        const auto& phase = m_Phases[m_PhaseIndex];
+        const auto& vf = CurrentFrames();
         if (m_State == State::WALK) {
-            SwitchAnimation(phase.walkHitFrames);
+            SwitchAnimation(vf.walkHitFrames);
         } else if (m_State == State::EAT) {
-            SwitchAnimation(phase.eatHitFrames);
+            SwitchAnimation(vf.eatHitFrames);
         }
     }
 
@@ -84,7 +132,7 @@ public:
             m_State = State::EAT;
             m_EatTimer = 0;
             m_HitFlashTimer = 0;
-            SwitchAnimation(m_Phases[m_PhaseIndex].eatFrames);
+            SwitchAnimation(CurrentFrames().eatFrames);
         }
     }
 
@@ -92,7 +140,7 @@ public:
         if (m_State != State::WALK) {
             m_State = State::WALK;
             m_HitFlashTimer = 0;
-            SwitchAnimation(m_Phases[m_PhaseIndex].walkFrames);
+            SwitchAnimation(CurrentFrames().walkFrames);
         }
     }
 
@@ -139,22 +187,57 @@ protected:
             idx = anim->GetCurrentFrameIndex();
         }
         auto newAnim = std::make_shared<Util::Animation>(
-            frames, true, 45, true, 100);
+            frames, true, m_AnimInterval, true, 100);
         if (idx < frames.size()) {
             newAnim->SetCurrentFrame(idx);
         }
         m_Drawable = newAnim;
     }
 
+    // Returns the VariantFrames for the current phase + active variant.
+    const VariantFrames& CurrentFrames() const {
+        return m_Phases[m_PhaseIndex].GetFrames(m_ActiveVariant);
+    }
+
+    // Recompute speed multiplier and variant from active effects.
+    void RefreshEffectState() {
+        float mult = 1.0f;
+        std::string variant = "idle";
+        for (const auto& e : m_Effects) {
+            mult *= e->GetSpeedMultiplier();
+            // Last non-idle variant wins (could add priority later).
+            std::string v = e->GetVariant();
+            if (v != "idle") variant = v;
+        }
+        m_Speed = m_BaseSpeed * mult;
+
+        // If variant changed, switch animation
+        if (variant != m_ActiveVariant) {
+            m_ActiveVariant = variant;
+            const auto& vf = CurrentFrames();
+            if (m_HitFlashTimer > 0) {
+                if (m_State == State::WALK) SwitchAnimation(vf.walkHitFrames);
+                else if (m_State == State::EAT) SwitchAnimation(vf.eatHitFrames);
+            } else {
+                if (m_State == State::WALK) SwitchAnimation(vf.walkFrames);
+                else if (m_State == State::EAT) SwitchAnimation(vf.eatFrames);
+            }
+        }
+    }
+
     std::vector<ArmorPhase> m_Phases;
     std::size_t m_PhaseIndex = 0;
     int m_Row;
+    float m_BaseSpeed;
     float m_Speed;
     int m_HP;
     int m_EatDamage;
+    int m_AnimInterval;
     State m_State = State::WALK;
     int m_EatTimer = 0;
     int m_HitFlashTimer = 0;
+    std::string m_ActiveVariant = "idle";
+    std::vector<std::unique_ptr<StatusEffect>> m_Effects;
     static constexpr int EAT_INTERVAL = 30;
     static constexpr int HIT_FLASH_DURATION = 8;
 };

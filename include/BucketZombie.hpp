@@ -13,11 +13,11 @@ public:
     static constexpr int EAT_DAMAGE = 100;
 
     std::vector<std::string> GetDieBodyFrames() const override {
-        return MakeFrames("/Zombie/bucket/die/body/", 10);
+        return MakeFrames("/Zombie/bucket/idle/die/body/", 10);
     }
 
     std::vector<std::string> GetDieHeadFrames() const override {
-        return MakeFrames("/Zombie/bucket/die/head/", 12);
+        return MakeFrames("/Zombie/bucket/idle/die/head/", 12);
     }
 
 private:
@@ -26,25 +26,57 @@ private:
     static std::vector<ArmorPhase> BuildPhases() {
         return {
             { 920, // Phase 0: full bucket (HP > 920)
-              MakeFrames("/Zombie/bucket/walk_0/normal/", 46),
-              MakeFrames("/Zombie/bucket/eat_0/normal/", 39),
-              MakeFrames("/Zombie/bucket/walk_0/hit/", 46),
-              MakeFrames("/Zombie/bucket/eat_0/hit/", 39) },
+              {{"idle", {
+                  MakeFrames("/Zombie/bucket/idle/walk_0/normal/", 46),
+                  MakeFrames("/Zombie/bucket/idle/eat_0/normal/", 39),
+                  MakeFrames("/Zombie/bucket/idle/walk_0/hit/", 46),
+                  MakeFrames("/Zombie/bucket/idle/eat_0/hit/", 39),
+              }},
+              {"frozen", {
+                  MakeFrames("/Zombie/bucket/frozen/walk_0/normal/", 46),
+                  MakeFrames("/Zombie/bucket/frozen/eat_0/normal/", 39),
+                  MakeFrames("/Zombie/bucket/frozen/walk_0/hit/", 46),
+                  MakeFrames("/Zombie/bucket/frozen/eat_0/hit/", 39),
+              }}} },
             { 555, // Phase 1: dented bucket (HP > 555)
-              MakeFrames("/Zombie/bucket/walk_1/normal/", 46),
-              MakeFrames("/Zombie/bucket/eat_1/normal/", 39),
-              MakeFrames("/Zombie/bucket/walk_1/hit/", 46),
-              MakeFrames("/Zombie/bucket/eat_1/hit/", 39) },
+              {{"idle", {
+                  MakeFrames("/Zombie/bucket/idle/walk_1/normal/", 46),
+                  MakeFrames("/Zombie/bucket/idle/eat_1/normal/", 39),
+                  MakeFrames("/Zombie/bucket/idle/walk_1/hit/", 46),
+                  MakeFrames("/Zombie/bucket/idle/eat_1/hit/", 39),
+              }},
+              {"frozen", {
+                  MakeFrames("/Zombie/bucket/frozen/walk_1/normal/", 46),
+                  MakeFrames("/Zombie/bucket/frozen/eat_1/normal/", 39),
+                  MakeFrames("/Zombie/bucket/frozen/walk_1/hit/", 46),
+                  MakeFrames("/Zombie/bucket/frozen/eat_1/hit/", 39),
+              }}} },
             { 190, // Phase 2: cracked bucket (HP > 190)
-              MakeFrames("/Zombie/bucket/walk_2/normal/", 46),
-              MakeFrames("/Zombie/bucket/eat_2/normal/", 39),
-              MakeFrames("/Zombie/bucket/walk_2/hit/", 46),
-              MakeFrames("/Zombie/bucket/eat_2/hit/", 39) },
+              {{"idle", {
+                  MakeFrames("/Zombie/bucket/idle/walk_2/normal/", 46),
+                  MakeFrames("/Zombie/bucket/idle/eat_2/normal/", 39),
+                  MakeFrames("/Zombie/bucket/idle/walk_2/hit/", 46),
+                  MakeFrames("/Zombie/bucket/idle/eat_2/hit/", 39),
+              }},
+              {"frozen", {
+                  MakeFrames("/Zombie/bucket/frozen/walk_2/normal/", 46),
+                  MakeFrames("/Zombie/bucket/frozen/eat_2/normal/", 39),
+                  MakeFrames("/Zombie/bucket/frozen/walk_2/hit/", 46),
+                  MakeFrames("/Zombie/bucket/frozen/eat_2/hit/", 39),
+              }}} },
             { 0,   // Phase 3: no bucket (HP > 0)
-              MakeFrames("/Zombie/bucket/walk_3/normal/", 46),
-              MakeFrames("/Zombie/bucket/eat_3/normal/", 39),
-              MakeFrames("/Zombie/bucket/walk_3/hit/", 46),
-              MakeFrames("/Zombie/bucket/eat_3/hit/", 39) },
+              {{"idle", {
+                  MakeFrames("/Zombie/bucket/idle/walk_3/normal/", 46),
+                  MakeFrames("/Zombie/bucket/idle/eat_3/normal/", 39),
+                  MakeFrames("/Zombie/bucket/idle/walk_3/hit/", 46),
+                  MakeFrames("/Zombie/bucket/idle/eat_3/hit/", 39),
+              }},
+              {"frozen", {
+                  MakeFrames("/Zombie/bucket/frozen/walk_3/normal/", 46),
+                  MakeFrames("/Zombie/bucket/frozen/eat_3/normal/", 39),
+                  MakeFrames("/Zombie/bucket/frozen/walk_3/hit/", 46),
+                  MakeFrames("/Zombie/bucket/frozen/eat_3/hit/", 39),
+              }}} },
         };
     }
 };

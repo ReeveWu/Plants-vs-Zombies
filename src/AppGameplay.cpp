@@ -66,7 +66,7 @@ void App::UpdateGameplay() {
                     m_SelectedCard = card;
                     m_HoldingCardIndex = card->GetIndex();
 
-                    m_HoldingPlant = std::make_shared<Plant>(
+                    m_HoldingPlant = CreatePlant(
                         card->GetIndex(), -1, -1);
                     m_HoldingPlant->SetZIndex(90);
                     m_HoldingPlant->m_Transform.translation = click;
@@ -96,6 +96,7 @@ void App::UpdateGameplay() {
     }
 
     UpdatePlantShooting();
+    UpdatePlantSunProduction();
     UpdateBullets();
     UpdateZombieEating();
     UpdateZombies();
@@ -108,7 +109,7 @@ void App::PlacePlant(int row, int col) {
     glm::vec2 screenPos = GridSystem::CellToPosition(row, col)
                           + glm::vec2{m_CameraOffset, 0.0f};
 
-    auto plant = std::make_shared<Plant>(m_HoldingCardIndex, row, col);
+    auto plant = CreatePlant(m_HoldingCardIndex, row, col);
     plant->SetZIndex(10);
     plant->m_Transform.translation = screenPos;
     m_PlantGrid[row][col] = plant;
@@ -150,7 +151,19 @@ void App::SpawnZombie() {
     int row = rand() % GridSystem::ROWS;
     float yPos = GridSystem::CellToPosition(row, GridSystem::COLS - 1).y;
 
-    auto zombie = std::make_shared<NormalZombie>(row);
+    // Weighted random: Normal 40%, Flag 20%, Conehead 25%, Bucket 15%
+    std::shared_ptr<Zombie> zombie;
+    int roll = rand() % 100;
+    if (roll < 40) {
+        zombie = std::make_shared<NormalZombie>(row);
+    } else if (roll < 60) {
+        zombie = std::make_shared<FlagZombie>(row);
+    } else if (roll < 85) {
+        zombie = std::make_shared<ConeheadZombie>(row);
+    } else {
+        zombie = std::make_shared<BucketZombie>(row);
+    }
+
     zombie->SetZIndex(15);
     zombie->m_Transform.translation = {620.0f + m_CameraOffset, yPos};
     m_Zombies.push_back(zombie);
@@ -202,10 +215,28 @@ void App::UpdatePlantShooting() {
                 glm::vec2 bulletPos = plant->m_Transform.translation;
                 bulletPos.x += 30.0f;
                 bulletPos.y += 20.0f;
-                auto bullet = std::make_shared<Bullet>(bulletPos);
+                auto bullet = std::make_shared<Bullet>(
+                    bulletPos, plant->GetDamage(), plant->IsIce());
                 bullet->SetRow(row);
                 m_Bullets.push_back(bullet);
                 m_Root.AddChild(bullet);
+            }
+        }
+    }
+}
+
+void App::UpdatePlantSunProduction() {
+    for (int row = 0; row < GridSystem::ROWS; ++row) {
+        for (int col = 0; col < GridSystem::COLS; ++col) {
+            auto& plant = m_PlantGrid[row][col];
+            if (!plant) continue;
+
+            if (plant->TryProduceSun()) {
+                glm::vec2 plantPos = plant->m_Transform.translation;
+                auto sun = std::make_shared<Sun>(plantPos, true);
+                m_Suns.push_back(sun);
+                m_Root.AddChild(sun);
+                LOG_DEBUG("Sunflower at ({}, {}) produced a sun", row, col);
             }
         }
     }
@@ -261,7 +292,7 @@ void App::UpdateZombieEating() {
                 zombie->StartEat();
 
                 if (zombie->ShouldDealEatDamage()) {
-                    plant->Hurt();
+                    plant->Hurt(zombie->GetEatDamage());
                     if (plant->IsDead()) {
                         m_Root.RemoveChild(plant);
                         plant = nullptr;
@@ -378,4 +409,15 @@ void App::UpdateDeathAnims() {
                 return false;
             }),
         m_DeathAnims.end());
+}
+
+std::shared_ptr<Plant> App::CreatePlant(int typeIndex, int row, int col) {
+    switch (typeIndex) {
+        case 1: return std::make_shared<Peashooter>(row, col);
+        case 2: return std::make_shared<Sunflower>(row, col);
+        case 4: return std::make_shared<Wallnut>(row, col);
+        case 6: return std::make_shared<IceShooter>(row, col);
+        case 8: return std::make_shared<FastShooter>(row, col);
+        default: return std::make_shared<Plant>(typeIndex, row, col);
+    }
 }

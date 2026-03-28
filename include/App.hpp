@@ -11,8 +11,16 @@
 #include "CardSlot.hpp"
 #include "GridSystem.hpp"
 #include "LawnMower.hpp"
+#include "BucketZombie.hpp"
+#include "ConeheadZombie.hpp"
+#include "FlagZombie.hpp"
 #include "NormalZombie.hpp"
 #include "Plant.hpp"
+#include "Peashooter.hpp"
+#include "IceShooter.hpp"
+#include "FastShooter.hpp"
+#include "Sunflower.hpp"
+#include "Wallnut.hpp"
 #include "Sun.hpp"
 #include "SunCounter.hpp"
 #include "ZombieCorpse.hpp"
@@ -62,12 +70,14 @@ private:
     void UpdateZombies();
     void UpdateBullets();
     void UpdatePlantShooting();
+    void UpdatePlantSunProduction();
     void UpdateZombieEating();
     void UpdateLawnMowers();
     void InitLawnMowers();
     void CheckWinLose();
     void UpdateDeathAnims();
     void SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie);
+    std::shared_ptr<Plant> CreatePlant(int typeIndex, int row, int col);
 
 private:
     State m_CurrentState = State::START;

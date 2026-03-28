@@ -99,6 +99,7 @@ void App::UpdateGameplay() {
 
     UpdatePlantShooting();
     UpdatePlantSunProduction();
+    UpdateSpecialPlants();
     UpdateBullets();
     UpdateZombieEating();
     UpdateZombies();
@@ -431,12 +432,106 @@ void App::UpdateDeathAnims() {
         m_DeathAnims.end());
 }
 
+void App::UpdateSpecialPlants() {
+    for (int row = 0; row < GridSystem::ROWS; ++row) {
+        for (int col = 0; col < GridSystem::COLS; ++col) {
+            auto& plant = m_PlantGrid[row][col];
+            if (!plant) continue;
+
+            int type = plant->GetTypeIndex();
+
+            // --- Potato Mine ---
+            if (type == 5) {
+                auto mine = std::dynamic_pointer_cast<PotatoMine>(plant);
+                if (!mine) continue;
+                mine->Update();
+
+                if (mine->GetMineState() == PotatoMine::MineState::READY) {
+                    for (auto& z : m_Zombies) {
+                        if (!z->IsAlive() || z->GetRow() != row) continue;
+                        float dx = z->GetX() - plant->m_Transform.translation.x;
+                        if (dx >= -10.0f && dx <= 40.0f) {
+                            mine->Explode();
+                            z->TakeDamage(PotatoMine::EXPLODE_DAMAGE);
+                            break;
+                        }
+                    }
+                }
+
+                if (mine->IsDone()) {
+                    m_Root.RemoveChild(plant);
+                    plant = nullptr;
+                }
+            }
+
+            // --- Cherry Bomb ---
+            else if (type == 3) {
+                auto bomb = std::dynamic_pointer_cast<CherryBomb>(plant);
+                if (!bomb) continue;
+                bomb->Update();
+
+                if (bomb->ShouldApplyDamage()) {
+                    plant->SetZIndex(20);
+                    // 3×3 AOE: kill all zombies in range
+                    float cx = plant->m_Transform.translation.x;
+                    float halfRange = 1.5f * GridSystem::CELL_WIDTH;
+                    for (auto& z : m_Zombies) {
+                        if (!z->IsAlive()) continue;
+                        int zRow = z->GetRow();
+                        if (zRow < bomb->GetMinRow() || zRow > bomb->GetMaxRow())
+                            continue;
+                        if (z->GetX() >= cx - halfRange && z->GetX() <= cx + halfRange) {
+                            z->MarkAshDeath();
+                            z->TakeDamage(CherryBomb::EXPLODE_DAMAGE);
+                        }
+                    }
+                }
+
+                if (bomb->IsDone()) {
+                    m_Root.RemoveChild(plant);
+                    plant = nullptr;
+                }
+            }
+
+            // --- Chomper ---
+            else if (type == 7) {
+                auto chomper = std::dynamic_pointer_cast<Chomper>(plant);
+                if (!chomper) continue;
+                chomper->Update();
+
+                if (chomper->CanChomp()) {
+                    // Find closest eating zombie in front
+                    std::shared_ptr<Zombie> target;
+                    float bestDist = 1e9f;
+                    float px = plant->m_Transform.translation.x;
+                    for (auto& z : m_Zombies) {
+                        if (!z->IsAlive() || z->GetRow() != row) continue;
+                        if (!z->IsEating()) continue;
+                        float dx = z->GetX() - px;
+                        if (dx >= -10.0f && dx < bestDist) {
+                            bestDist = dx;
+                            target = z;
+                        }
+                    }
+                    if (target) {
+                        chomper->StartBite();
+                        target->MarkEaten();
+                    }
+                }
+            }
+        }
+    }
+}
+
 std::shared_ptr<Plant> App::CreatePlant(int typeIndex, int row, int col) {
     switch (typeIndex) {
         case 1: return std::make_shared<Peashooter>(row, col);
         case 2: return std::make_shared<Sunflower>(row, col);
+        case 3: return std::make_shared<CherryBomb>(row, col);
         case 4: return std::make_shared<Wallnut>(row, col);
+        case 5: return std::make_shared<PotatoMine>(row, col);
         case 6: return std::make_shared<IceShooter>(row, col);
+        case 7: return std::make_shared<Chomper>(row, col);
         case 8: return std::make_shared<FastShooter>(row, col);
         default: return std::make_shared<Plant>(typeIndex, row, col);
     }

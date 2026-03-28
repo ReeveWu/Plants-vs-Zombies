@@ -25,6 +25,9 @@ set(INCLUDE_FILES
     FastShooter.hpp
     Sunflower.hpp
     Wallnut.hpp
+    PotatoMine.hpp
+    CherryBomb.hpp
+    Chomper.hpp
     Zombie.hpp
     StatusEffect.hpp
     ZombieCorpse.hpp

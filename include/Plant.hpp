@@ -10,7 +10,6 @@ class Plant : public AnimatedCharacter {
 public:
     static constexpr int DEFAULT_HP = 300;
 
-    // Legacy constructor for non-refactored plants (cherrybomb, mine, chomper)
     Plant(int typeIndex, int row, int col)
         : AnimatedCharacter(GetFramePaths(typeIndex), true, 100, true, 100),
           m_TypeIndex(typeIndex), m_Row(row), m_Col(col) {
@@ -45,7 +44,6 @@ public:
         return false;
     }
 
-    // Legacy static helper (used by non-refactored plant types)
     static std::vector<std::string> GetFramePaths(int typeIndex) {
         struct AnimData {
             const char* dir;
@@ -79,8 +77,19 @@ public:
         return paths;
     }
 
+    static std::vector<std::string> MakeActionFrames(
+        const std::string& subDir, int count) {
+        std::vector<std::string> paths;
+        paths.reserve(count);
+        for (int i = 0; i < count; ++i) {
+            paths.push_back(
+                std::string(RESOURCE_DIR "/Plant/") + subDir + "/"
+                + std::to_string(i) + ".png");
+        }
+        return paths;
+    }
+
 protected:
-    // Subclass constructor
     Plant(const std::vector<std::string>& frames, int typeIndex,
           int row, int col, int hp, std::size_t interval = 100)
         : AnimatedCharacter(frames, true, interval, true, 100),

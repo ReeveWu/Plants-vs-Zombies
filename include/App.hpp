@@ -21,6 +21,9 @@
 #include "FastShooter.hpp"
 #include "Sunflower.hpp"
 #include "Wallnut.hpp"
+#include "PotatoMine.hpp"
+#include "CherryBomb.hpp"
+#include "Chomper.hpp"
 #include "Sun.hpp"
 #include "SunCounter.hpp"
 #include "ZombieCorpse.hpp"
@@ -74,6 +77,7 @@ private:
     void UpdateZombieEating();
     void UpdateLawnMowers();
     void InitLawnMowers();
+    void UpdateSpecialPlants();
     void CheckWinLose();
     void UpdateDeathAnims();
     void SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie);

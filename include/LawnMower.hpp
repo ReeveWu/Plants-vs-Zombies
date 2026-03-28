@@ -34,7 +34,7 @@ public:
     }
 
 private:
-    static constexpr float SPEED = 4.0f;
+    static constexpr float SPEED = 7.0f;
     State m_State = State::IDLE;
 };
 

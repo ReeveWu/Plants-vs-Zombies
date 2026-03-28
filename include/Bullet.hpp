@@ -6,13 +6,18 @@
 
 class Bullet : public Util::GameObject {
 public:
-    explicit Bullet(const glm::vec2& startPos, int damage = 1)
+    explicit Bullet(const glm::vec2& startPos, int damage = 20,
+                    bool isIce = false)
         : GameObject(
-              std::make_unique<Util::Image>(RESOURCE_DIR "/Bullet/pea.png"),
+              std::make_unique<Util::Image>(
+                  isIce ? RESOURCE_DIR "/Bullet/icepea.png"
+                        : RESOURCE_DIR "/Bullet/pea.png"),
               21.0f),
-          m_Damage(damage) {
+          m_Damage(damage), m_IsIce(isIce) {
         m_Transform.translation = startPos;
     }
+
+    bool IsIce() const { return m_IsIce; }
 
     void Update() { m_Transform.translation.x += SPEED; }
 
@@ -35,6 +40,7 @@ private:
     int m_Damage;
     int m_Row = -1;
     bool m_Hit = false;
+    bool m_IsIce = false;
 };
 
 #endif // BULLET_HPP

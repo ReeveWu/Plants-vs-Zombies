@@ -15,8 +15,16 @@ set(INCLUDE_FILES
     Bullet.hpp
     GridSystem.hpp
     LawnMower.hpp
+    BucketZombie.hpp
+    ConeheadZombie.hpp
+    FlagZombie.hpp
     NormalZombie.hpp
     Plant.hpp
+    Peashooter.hpp
+    IceShooter.hpp
+    FastShooter.hpp
+    Sunflower.hpp
+    Wallnut.hpp
     Zombie.hpp
     ZombieCorpse.hpp
     Sun.hpp

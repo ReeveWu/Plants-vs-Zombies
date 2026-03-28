@@ -9,7 +9,7 @@ public:
         : Zombie(BuildPhases(), row, SPEED, HP, EAT_DAMAGE) {}
 
     static constexpr float SPEED = 0.5f;
-    static constexpr int HP = 560;       // 370 (cone) + 190 (base)
+    static constexpr int HP = 560; 
     static constexpr int EAT_DAMAGE = 100;
 
     std::vector<std::string> GetDieBodyFrames() const override {
@@ -18,6 +18,10 @@ public:
 
     std::vector<std::string> GetDieHeadFrames() const override {
         return MakeFrames("/Zombie/cone/idle/die/head/", 12);
+    }
+
+    std::vector<std::string> GetAshFrames() const override {
+        return MakeFrames("/Zombie/cone/idle/ash/", 20);
     }
 
 private:

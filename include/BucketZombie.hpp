@@ -20,9 +20,11 @@ public:
         return MakeFrames("/Zombie/bucket/idle/die/head/", 12);
     }
 
+    std::vector<std::string> GetAshFrames() const override {
+        return MakeFrames("/Zombie/bucket/idle/ash/", 20);
+    }
+
 private:
-    // 4 armor phases: full bucket → dented → cracked → no bucket
-    // Bucket armor = 1100, spread across first 3 phases
     static std::vector<ArmorPhase> BuildPhases() {
         return {
             { 920, // Phase 0: full bucket (HP > 920)

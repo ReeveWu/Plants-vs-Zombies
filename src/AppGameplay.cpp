@@ -184,7 +184,9 @@ void App::UpdateZombies() {
         std::remove_if(m_Zombies.begin(), m_Zombies.end(),
             [&](const std::shared_ptr<Zombie>& z) {
                 if (z->IsDead()) {
-                    SpawnDeathAnims(z);
+                    if (!z->IsEaten()) {
+                        SpawnDeathAnims(z);
+                    }
                     m_Root.RemoveChild(z);
                     return true;
                 }
@@ -390,6 +392,17 @@ void App::CheckWinLose() {
 
 void App::SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie) {
     glm::vec2 pos = zombie->m_Transform.translation;
+
+    if (zombie->IsAshDeath()) {
+        auto ashFrames = zombie->GetAshFrames();
+        if (!ashFrames.empty()) {
+            auto ash = std::make_shared<ZombieCorpse>(ashFrames, pos);
+            ash->SetZIndex(14);
+            m_DeathAnims.push_back(ash);
+            m_Root.AddChild(ash);
+        }
+        return;
+    }
 
     auto body = std::make_shared<ZombieCorpse>(
         zombie->GetDieBodyFrames(), pos);

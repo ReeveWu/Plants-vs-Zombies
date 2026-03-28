@@ -55,11 +55,10 @@ public:
     // --- Effect system ---------------------------------------------------
 
     void ApplyEffect(std::unique_ptr<StatusEffect> effect) {
-        // Check if same variant already active: refresh instead of stack
         std::string newVar = effect->GetVariant();
         for (auto& e : m_Effects) {
             if (e->GetVariant() == newVar) {
-                e = std::move(effect); // replace / refresh
+                e = std::move(effect);
                 RefreshEffectState();
                 return;
             }
@@ -71,7 +70,6 @@ public:
     // --- Per-frame update ------------------------------------------------
 
     void Update() {
-        // Tick effects & remove expired ones
         bool effectsChanged = false;
         m_Effects.erase(
             std::remove_if(m_Effects.begin(), m_Effects.end(),
@@ -88,7 +86,6 @@ public:
         if (m_State == State::EAT) {
             ++m_EatTimer;
         }
-        // Hit flash: revert to normal variant after flash duration
         if (m_HitFlashTimer > 0) {
             --m_HitFlashTimer;
             if (m_HitFlashTimer == 0) {
@@ -110,14 +107,12 @@ public:
             SetVisible(false);
             return;
         }
-
-        // Check armor phase transition (may skip multiple phases)
+        
         while (m_PhaseIndex + 1 < m_Phases.size()
                && m_HP <= m_Phases[m_PhaseIndex].hpThreshold) {
             ++m_PhaseIndex;
         }
 
-        // Hit flash with current phase's hit variant
         m_HitFlashTimer = HIT_FLASH_DURATION;
         const auto& vf = CurrentFrames();
         if (m_State == State::WALK) {
@@ -163,11 +158,16 @@ public:
     State GetState() const { return m_State; }
     int GetEatDamage() const { return m_EatDamage; }
 
-    // Subclass provides these for death animation
     virtual std::vector<std::string> GetDieBodyFrames() const = 0;
     virtual std::vector<std::string> GetDieHeadFrames() const = 0;
+    virtual std::vector<std::string> GetAshFrames() const { return {}; }
 
-    // Utility for subclasses to build frame path lists
+    void MarkAshDeath() { m_AshDeath = true; }
+    bool IsAshDeath() const { return m_AshDeath; }
+
+    void MarkEaten() { m_Eaten = true; m_State = State::DIE; SetVisible(false); }
+    bool IsEaten() const { return m_Eaten; }
+
     static std::vector<std::string> MakeFrames(
         const std::string& dir, int count) {
         std::vector<std::string> paths;
@@ -194,24 +194,20 @@ protected:
         m_Drawable = newAnim;
     }
 
-    // Returns the VariantFrames for the current phase + active variant.
     const VariantFrames& CurrentFrames() const {
         return m_Phases[m_PhaseIndex].GetFrames(m_ActiveVariant);
     }
 
-    // Recompute speed multiplier and variant from active effects.
     void RefreshEffectState() {
         float mult = 1.0f;
         std::string variant = "idle";
         for (const auto& e : m_Effects) {
             mult *= e->GetSpeedMultiplier();
-            // Last non-idle variant wins (could add priority later).
             std::string v = e->GetVariant();
             if (v != "idle") variant = v;
         }
         m_Speed = m_BaseSpeed * mult;
 
-        // If variant changed, switch animation
         if (variant != m_ActiveVariant) {
             m_ActiveVariant = variant;
             const auto& vf = CurrentFrames();
@@ -238,6 +234,8 @@ protected:
     int m_HitFlashTimer = 0;
     std::string m_ActiveVariant = "idle";
     std::vector<std::unique_ptr<StatusEffect>> m_Effects;
+    bool m_AshDeath = false;
+    bool m_Eaten = false;
     static constexpr int EAT_INTERVAL = 30;
     static constexpr int HIT_FLASH_DURATION = 8;
 };

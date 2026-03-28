@@ -20,6 +20,10 @@ public:
         return MakeFrames("/Zombie/normal/idle/die/head/", 12);
     }
 
+    std::vector<std::string> GetAshFrames() const override {
+        return MakeFrames("/Zombie/normal/idle/ash/", 20);
+    }
+
 private:
     static std::vector<ArmorPhase> BuildPhases() {
         return {{

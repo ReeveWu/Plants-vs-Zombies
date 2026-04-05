@@ -29,15 +29,15 @@ private:
         return {{
             0,
             {{"idle", {
-                MakeFrames("/Zombie/flag/idle/walk/normal/", 11),
+                MakeFrames("/Zombie/flag/idle/walk/normal/", 12),
                 MakeFrames("/Zombie/flag/idle/eat/normal/", 11),
-                MakeFrames("/Zombie/flag/idle/walk/hit/", 11),
+                MakeFrames("/Zombie/flag/idle/walk/hit/", 12),
                 MakeFrames("/Zombie/flag/idle/eat/hit/", 11),
             }},
             {"frozen", {
-                MakeFrames("/Zombie/flag/frozen/walk/normal/", 11),
+                MakeFrames("/Zombie/flag/frozen/walk/normal/", 12),
                 MakeFrames("/Zombie/flag/frozen/eat/normal/", 11),
-                MakeFrames("/Zombie/flag/frozen/walk/hit/", 11),
+                MakeFrames("/Zombie/flag/frozen/walk/hit/", 12),
                 MakeFrames("/Zombie/flag/frozen/eat/hit/", 11),
             }}},
         }};

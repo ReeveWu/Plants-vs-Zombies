@@ -56,9 +56,38 @@ void App::Update() {
         break;
 
     case Phase::LEVEL_COMPLETE:
-        ++m_EndTimer;
-        if (m_EndTimer >= END_SCREEN_DURATION) {
-            m_CurrentState = State::END;
+        if (!m_EndScreen) {
+            std::vector<std::string> transitionPaths;
+            for (int i = 0; i <= 99; ++i) {
+                transitionPaths.push_back(RESOURCE_DIR "/LevelCompleted/win/transition/" + std::to_string(i) + ".png");
+            }
+            
+            m_EndScreen = std::make_shared<AnimatedCharacter>(
+                transitionPaths,
+                false, // play = false (pause initially to wait out the loading spike)
+                10,   // interval = 10ms
+                false // looping = false
+            );
+            m_EndScreen->SetZIndex(100.0f);
+            m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+            m_Root.AddChild(m_EndScreen);
+            m_EndTimer = 0;
+        } else {
+            m_EndTimer++;
+            auto anim = std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen);
+            
+            // Wait 2 frames for DeltaTime to stabilize after heavy image loading
+            if (m_EndTimer <= 2) {
+                break;
+            }
+            
+            if (anim) {
+                if (!anim->IsPlaying() && !anim->IfAnimationEnds()) {
+                    anim->Play();
+                } else if (anim->IfAnimationEnds()) {
+                    m_CurrentState = State::END;
+                }
+            }
         }
         break;
 

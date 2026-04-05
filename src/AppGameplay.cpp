@@ -380,12 +380,7 @@ void App::CheckWinLose() {
     // Win: all zombies spawned and none alive
     if (m_ZombiesSpawned >= ZOMBIES_PER_LEVEL && m_Zombies.empty()) {
         LOG_DEBUG("Level Complete! All zombies defeated.");
-        m_EndScreen = std::make_shared<Util::GameObject>(
-            std::make_shared<Util::Image>(
-                RESOURCE_DIR "/LevelCompleted/lose/0.png"),
-            100.0f);
-        m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
-        m_Root.AddChild(m_EndScreen);
+        
         m_EndTimer = 0;
         m_Phase = Phase::LEVEL_COMPLETE;
     }

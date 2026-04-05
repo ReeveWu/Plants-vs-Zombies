@@ -4,8 +4,39 @@
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 
+#include "Util/Image.hpp"
+
 void App::Update() {
     switch (m_Phase) {
+    case Phase::MAIN_MENU:
+        if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
+            auto click = Util::Input::GetCursorPosition();
+            auto pos = m_StartMenuButton->m_Transform.translation;
+            auto size = m_StartMenuButton->GetScaledSize();
+            if (click.x >= pos.x - size.x / 2 && click.x <= pos.x + size.x / 2 &&
+                click.y >= pos.y - size.y / 2 && click.y <= pos.y + size.y / 2) {
+                m_Phase = Phase::MAIN_MENU_FLASH;
+                m_MainMenuFlashTimer = 0;
+                m_MainMenuFlashCount = 0;
+            }
+        }
+        break;
+
+    case Phase::MAIN_MENU_FLASH:
+        ++m_MainMenuFlashTimer;
+        if (m_MainMenuFlashTimer % 8 == 0) { 
+            ++m_MainMenuFlashCount;
+            if (m_MainMenuFlashCount % 2 == 0) {
+                m_StartMenuButton->SetDrawable(std::make_shared<Util::Image>(RESOURCE_DIR "/Menu/options/0.png"));
+            } else {
+                m_StartMenuButton->SetDrawable(std::make_shared<Util::Image>(RESOURCE_DIR "/Menu/options/1.png"));
+            }
+        }
+        if (m_MainMenuFlashCount > 6) { // flash 6 times
+            InitLevel();
+        }
+        break;
+
     case Phase::INTRO_CAMERA:
         UpdateCamera();
         InitLawnMowers();

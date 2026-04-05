@@ -38,8 +38,13 @@ void App::InitCards() {
     }
 }
 
-void App::Start() {
-    LOG_TRACE("Start");
+void App::InitLevel() {
+    LOG_TRACE("InitLevel");
+
+    m_Root.RemoveChild(m_StartMenuBackground);
+    m_Root.RemoveChild(m_StartMenuButton);
+    m_StartMenuBackground = nullptr;
+    m_StartMenuButton = nullptr;
 
     m_Background = std::make_shared<Background>();
     m_Root.AddChild(m_Background);
@@ -73,6 +78,27 @@ void App::Start() {
     m_ZombieSpawnTimer = 0;
     m_ZombiesSpawned = 0;
     m_Bullets.clear();
+}
 
+void App::Start() {
+    LOG_TRACE("Start");
+
+    m_StartMenuBackground = std::make_shared<Util::GameObject>(
+        std::make_shared<Util::Image>(RESOURCE_DIR "/Menu/main.png"),
+        100.0f); // Make sure it's visible, adjust zIndex later if needed
+    m_StartMenuBackground->SetZIndex(10);
+    m_Root.AddChild(m_StartMenuBackground);
+
+    m_StartMenuButton = std::make_shared<Util::GameObject>(
+        std::make_shared<Util::Image>(RESOURCE_DIR "/Menu/options/0.png"),
+        100.0f);
+    m_StartMenuButton->SetZIndex(11);
+    // Approximate position of the "Start" or "Adventure" button
+    m_StartMenuButton->m_Transform.translation = {270.0f, 180.0f};
+    m_StartMenuButton->m_Transform.scale = {1.4f, 1.4f};
+    
+    m_Root.AddChild(m_StartMenuButton);
+
+    m_Phase = Phase::MAIN_MENU;
     m_CurrentState = State::UPDATE;
 }

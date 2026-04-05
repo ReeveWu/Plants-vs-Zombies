@@ -49,6 +49,8 @@ public:
 
 private:
     enum class Phase {
+        MAIN_MENU,
+        MAIN_MENU_FLASH,
         INTRO_CAMERA,
         READY_ANIM,
         GAMEPLAY,
@@ -67,6 +69,7 @@ private:
     void UpdateGameplay();
     void SpawnSkySun();
     void InitCards();
+    void InitLevel();
     void PlacePlant(int row, int col);
     void CancelHolding();
     void SpawnZombie();
@@ -141,6 +144,11 @@ private:
     static constexpr float CAMERA_PAN_TARGET = -150.0f;  // road-preview position
     static constexpr int CAMERA_PAUSE_FRAMES = 60;
     static constexpr int SUN_SPAWN_INTERVAL = 300;
+    // Start screen objects
+    std::shared_ptr<Util::GameObject> m_StartMenuBackground;
+    std::shared_ptr<Util::GameObject> m_StartMenuButton;    
+    int m_MainMenuFlashTimer = 0;
+    int m_MainMenuFlashCount = 0;
 };
 
 #endif

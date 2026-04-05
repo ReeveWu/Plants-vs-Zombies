@@ -85,11 +85,62 @@ void App::Update() {
                 if (!anim->IsPlaying() && !anim->IfAnimationEnds()) {
                     anim->Play();
                 } else if (anim->IfAnimationEnds()) {
-                    m_CurrentState = State::END;
+                    m_Root.RemoveChild(m_EndScreen);
+                    m_EndScreen = nullptr;
+
+                    if (m_CurrentLevel >= 14) {
+                        // Final level beaten — show victory
+                        m_EndScreen = std::make_shared<Util::GameObject>(
+                            std::make_shared<Util::Image>(
+                                RESOURCE_DIR "/LevelCompleted/win/win_card.png"),
+                            100.0f);
+                        m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+                        m_Root.AddChild(m_EndScreen);
+                        m_EndTimer = 0;
+                        m_Phase = Phase::GAME_OVER; // reuse for victory display
+                    } else {
+                        // Advance to next level
+                        ClearLevel();
+                        m_CurrentLevel++;
+                        InitLevel();
+
+                        // Create fade-in overlay (reverse transition: white → transparent)
+                        std::vector<std::string> fadeInPaths;
+                        for (int i = 99; i >= 0; --i) {
+                            fadeInPaths.push_back(
+                                RESOURCE_DIR "/LevelCompleted/win/transition/"
+                                + std::to_string(i) + ".png");
+                        }
+                        m_EndScreen = std::make_shared<AnimatedCharacter>(
+                            fadeInPaths, false, 10, false);
+                        m_EndScreen->SetZIndex(100.0f);
+                        m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+                        m_Root.AddChild(m_EndScreen);
+                        m_EndTimer = 0;
+                        m_Phase = Phase::LEVEL_FADE_IN;
+                    }
                 }
             }
         }
         break;
+
+    case Phase::LEVEL_FADE_IN: {
+        m_EndTimer++;
+        auto anim = std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen);
+
+        if (m_EndTimer <= 2) break;
+
+        if (anim) {
+            if (!anim->IsPlaying() && !anim->IfAnimationEnds()) {
+                anim->Play();
+            } else if (anim->IfAnimationEnds()) {
+                m_Root.RemoveChild(m_EndScreen);
+                m_EndScreen = nullptr;
+                m_Phase = Phase::INTRO_CAMERA;
+            }
+        }
+        break;
+    }
 
     case Phase::GAME_OVER:
         ++m_EndTimer;
@@ -111,7 +162,9 @@ void App::InitLawnMowers() {
     for (int row = 0; row < GridSystem::ROWS; ++row) {
         if (m_LawnMowers[row]) {
             m_Root.RemoveChild(m_LawnMowers[row]);
+            m_LawnMowers[row] = nullptr;
         }
+        if (!IsActiveLane(row)) continue;
         float y = GridSystem::CellToPosition(row, 0).y - 20.0f;
         auto mower = std::make_shared<LawnMower>(
             glm::vec2{LAWNMOWER_X + m_CameraOffset, y});

@@ -30,23 +30,35 @@ void App::InitCards() {
     constexpr float y = 310.0f;
 
     m_Cards.clear();
-    for (int i = 0; i < 8; ++i) {
-        glm::vec2 pos = {startX + spacing * i, y};
-        auto card = std::make_shared<CardSlot>(i + 1, plantData[i], pos);
+    const auto& level = GetAllLevels()[m_CurrentLevel];
+    int slot = 0;
+    for (int plantType : level.availablePlants) {
+        glm::vec2 pos = {startX + spacing * slot, y};
+        auto card = std::make_shared<CardSlot>(
+            plantType, plantData[plantType - 1], pos);
         m_Cards.push_back(card);
         m_Root.AddChild(card);
+        ++slot;
     }
 }
 
 void App::InitLevel() {
-    LOG_TRACE("InitLevel");
+    LOG_TRACE("InitLevel (level {})", m_CurrentLevel + 1);
 
-    m_Root.RemoveChild(m_StartMenuBackground);
-    m_Root.RemoveChild(m_StartMenuButton);
-    m_StartMenuBackground = nullptr;
-    m_StartMenuButton = nullptr;
+    if (m_StartMenuBackground) {
+        m_Root.RemoveChild(m_StartMenuBackground);
+        m_StartMenuBackground = nullptr;
+    }
+    if (m_StartMenuButton) {
+        m_Root.RemoveChild(m_StartMenuButton);
+        m_StartMenuButton = nullptr;
+    }
 
-    m_Background = std::make_shared<Background>();
+    const auto& level = GetAllLevels()[m_CurrentLevel];
+
+    m_ActiveLanes = GetActiveLanes(level.lanes);
+
+    m_Background = std::make_shared<Background>(level.lanes);
     m_Root.AddChild(m_Background);
 
     m_CardBarBackground = std::make_shared<Util::GameObject>(
@@ -78,6 +90,69 @@ void App::InitLevel() {
     m_ZombieSpawnTimer = 0;
     m_ZombiesSpawned = 0;
     m_Bullets.clear();
+    m_DeathAnims.clear();
+
+    // Level-specific spawn setup
+    m_TotalZombiesToSpawn = level.TotalZombies();
+    m_SpawnInterval = level.spawnIntervalFrames;
+    m_InitialDelayTimer = level.initialDelayFrames;
+    m_NormalRemaining = level.normalCount;
+    m_ConeheadRemaining = level.coneheadCount;
+    m_BucketRemaining = level.bucketCount;
+    m_FlagRemaining = level.flagCount;
+    m_WaveIndex = 0;
+    m_WaveBurstRemaining = 0;
+}
+
+void App::ClearLevel() {
+    if (m_Background) {
+        m_Root.RemoveChild(m_Background);
+        m_Background = nullptr;
+    }
+    if (m_CardBarBackground) {
+        m_Root.RemoveChild(m_CardBarBackground);
+        m_CardBarBackground = nullptr;
+    }
+    if (m_SunCounter) {
+        m_Root.RemoveChild(m_SunCounter);
+        m_SunCounter = nullptr;
+    }
+    for (auto& card : m_Cards) m_Root.RemoveChild(card);
+    m_Cards.clear();
+    for (auto& sun : m_Suns) m_Root.RemoveChild(sun);
+    m_Suns.clear();
+    for (int r = 0; r < GridSystem::ROWS; ++r) {
+        for (int c = 0; c < GridSystem::COLS; ++c) {
+            if (m_PlantGrid[r][c]) {
+                m_Root.RemoveChild(m_PlantGrid[r][c]);
+                m_PlantGrid[r][c] = nullptr;
+            }
+        }
+    }
+    if (m_HoldingPlant) {
+        m_Root.RemoveChild(m_HoldingPlant);
+        m_HoldingPlant = nullptr;
+    }
+    for (auto& z : m_Zombies) m_Root.RemoveChild(z);
+    m_Zombies.clear();
+    for (auto& b : m_Bullets) m_Root.RemoveChild(b);
+    m_Bullets.clear();
+    for (auto& d : m_DeathAnims) m_Root.RemoveChild(d);
+    m_DeathAnims.clear();
+    for (auto& m : m_LawnMowers) {
+        if (m) { m_Root.RemoveChild(m); m = nullptr; }
+    }
+    if (m_ReadyAnim) {
+        m_Root.RemoveChild(m_ReadyAnim);
+        m_ReadyAnim = nullptr;
+    }
+}
+
+bool App::IsActiveLane(int row) const {
+    for (int lane : m_ActiveLanes) {
+        if (lane == row) return true;
+    }
+    return false;
 }
 
 void App::Start() {

@@ -6,11 +6,17 @@
 
 class Background : public Util::GameObject {
 public:
-    Background()
+    explicit Background(int lanes = 5)
         : GameObject(
-              std::make_shared<Util::Image>(RESOURCE_DIR "/Background/land1.jpg"),
+              std::make_shared<Util::Image>(GetImagePath(lanes)),
               -10) {
         m_Transform.scale = {1.2f, 1.2f};
+    }
+
+private:
+    static std::string GetImagePath(int lanes) {
+        return std::string(RESOURCE_DIR "/Background/land")
+               + std::to_string(lanes) + ".jpg";
     }
 };
 

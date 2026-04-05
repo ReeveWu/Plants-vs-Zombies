@@ -28,6 +28,7 @@ set(INCLUDE_FILES
     PotatoMine.hpp
     CherryBomb.hpp
     Chomper.hpp
+    LevelConfig.hpp
     Zombie.hpp
     StatusEffect.hpp
     ZombieCorpse.hpp

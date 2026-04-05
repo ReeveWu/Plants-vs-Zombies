@@ -7,6 +7,7 @@
 
 #include "AnimatedCharacter.hpp"
 #include "Background.hpp"
+#include "LevelConfig.hpp"
 #include "Bullet.hpp"
 #include "CardSlot.hpp"
 #include "GridSystem.hpp"
@@ -55,6 +56,7 @@ private:
         READY_ANIM,
         GAMEPLAY,
         LEVEL_COMPLETE,
+        LEVEL_FADE_IN,
         GAME_OVER,
     };
 
@@ -82,6 +84,8 @@ private:
     void InitLawnMowers();
     void UpdateSpecialPlants();
     void CheckWinLose();
+    void ClearLevel();
+    bool IsActiveLane(int row) const;
     void UpdateDeathAnims();
     void SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie);
     std::shared_ptr<Plant> CreatePlant(int typeIndex, int row, int col);
@@ -113,12 +117,23 @@ private:
     std::shared_ptr<Plant> m_HoldingPlant;
     int m_HoldingCardIndex = -1;
 
+    // Level system
+    int m_CurrentLevel = 0;
+    std::vector<int> m_ActiveLanes;
+    int m_TotalZombiesToSpawn = 0;
+    int m_SpawnInterval = 600;
+    int m_InitialDelayTimer = 0;
+    int m_NormalRemaining = 0;
+    int m_ConeheadRemaining = 0;
+    int m_BucketRemaining = 0;
+    int m_FlagRemaining = 0;
+    int m_WaveIndex = 0;
+    int m_WaveBurstRemaining = 0;
+
     // Zombie system
     std::vector<std::shared_ptr<Zombie>> m_Zombies;
     int m_ZombieSpawnTimer = 0;
     int m_ZombiesSpawned = 0;
-    static constexpr int ZOMBIE_SPAWN_INTERVAL = 600;
-    static constexpr int ZOMBIES_PER_LEVEL = 10;
     static constexpr float ZOMBIE_LOSE_X = -600.0f;
 
     // Bullet system

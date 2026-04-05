@@ -56,7 +56,8 @@ void App::UpdateGameplay() {
             glm::vec2 worldPos = click - glm::vec2{m_CameraOffset, 0.0f};
             auto [row, col] = GridSystem::PositionToCell(worldPos);
 
-            if (GridSystem::IsValidCell(row, col) && !m_PlantGrid[row][col]) {
+            if (GridSystem::IsValidCell(row, col) && !m_PlantGrid[row][col]
+                && IsActiveLane(row)) {
                 PlacePlant(row, col);
             }
         } else {
@@ -89,12 +90,54 @@ void App::UpdateGameplay() {
         }
     }
 
-    // Zombie spawning
-    ++m_ZombieSpawnTimer;
-    if (m_ZombieSpawnTimer >= ZOMBIE_SPAWN_INTERVAL
-        && m_ZombiesSpawned < ZOMBIES_PER_LEVEL) {
-        SpawnZombie();
-        m_ZombieSpawnTimer = 0;
+    // Zombie spawning with level config
+    if (m_InitialDelayTimer > 0) {
+        --m_InitialDelayTimer;
+    } else {
+        // Check wave triggers
+        const auto& level = GetAllLevels()[m_CurrentLevel];
+        if (m_WaveIndex < static_cast<int>(level.waves.size())
+            && m_TotalZombiesToSpawn > 0) {
+            float progress = static_cast<float>(m_ZombiesSpawned)
+                             / m_TotalZombiesToSpawn;
+            if (progress >= level.waves[m_WaveIndex].progressThreshold) {
+                int waveCount = level.waves[m_WaveIndex].count;
+                // Flag zombie leads the wave
+                if (m_FlagRemaining > 0) {
+                    int row = m_ActiveLanes[rand() % m_ActiveLanes.size()];
+                    auto flag = std::make_shared<FlagZombie>(row);
+                    float yPos = GridSystem::CellToPosition(
+                        row, GridSystem::COLS - 1).y;
+                    flag->SetZIndex(15);
+                    flag->m_Transform.translation = {
+                        620.0f + m_CameraOffset
+                            + static_cast<float>(rand() % 100),
+                        yPos};
+                    m_Zombies.push_back(flag);
+                    m_Root.AddChild(flag);
+                    --m_FlagRemaining;
+                    ++m_ZombiesSpawned;
+                    --waveCount;
+                }
+                // Spawn wave burst
+                for (int i = 0; i < waveCount; ++i) {
+                    int remaining = m_NormalRemaining + m_ConeheadRemaining
+                                    + m_BucketRemaining;
+                    if (remaining <= 0) break;
+                    SpawnZombie();
+                }
+                ++m_WaveIndex;
+            }
+        }
+
+        // Regular interval spawning
+        ++m_ZombieSpawnTimer;
+        int remaining = m_NormalRemaining + m_ConeheadRemaining
+                        + m_BucketRemaining;
+        if (m_ZombieSpawnTimer >= m_SpawnInterval && remaining > 0) {
+            SpawnZombie();
+            m_ZombieSpawnTimer = 0;
+        }
     }
 
     UpdatePlantShooting();
@@ -151,29 +194,35 @@ void App::SpawnSkySun() {
 }
 
 void App::SpawnZombie() {
-    int row = rand() % GridSystem::ROWS;
+    int remaining = m_NormalRemaining + m_ConeheadRemaining
+                    + m_BucketRemaining;
+    if (remaining <= 0) return;
+
+    int row = m_ActiveLanes[rand() % m_ActiveLanes.size()];
     float yPos = GridSystem::CellToPosition(row, GridSystem::COLS - 1).y;
 
-    // Weighted random: Normal 40%, Flag 20%, Conehead 25%, Bucket 15%
     std::shared_ptr<Zombie> zombie;
-    int roll = rand() % 100;
-    if (roll < 40) {
-        zombie = std::make_shared<FlagZombie>(row);
-        // zombie = std::make_shared<NormalZombie>(row);
-    } else if (roll < 60) {
-        zombie = std::make_shared<FlagZombie>(row);
-    } else if (roll < 85) {
+    int roll = rand() % remaining;
+    if (roll < m_NormalRemaining) {
+        zombie = std::make_shared<NormalZombie>(row);
+        --m_NormalRemaining;
+    } else if (roll < m_NormalRemaining + m_ConeheadRemaining) {
         zombie = std::make_shared<ConeheadZombie>(row);
+        --m_ConeheadRemaining;
     } else {
         zombie = std::make_shared<BucketZombie>(row);
+        --m_BucketRemaining;
     }
 
     zombie->SetZIndex(15);
-    zombie->m_Transform.translation = {620.0f + m_CameraOffset, yPos};
+    zombie->m_Transform.translation = {
+        620.0f + m_CameraOffset + static_cast<float>(rand() % 60),
+        yPos};
     m_Zombies.push_back(zombie);
     m_Root.AddChild(zombie);
     ++m_ZombiesSpawned;
-    LOG_DEBUG("Zombie spawned in row {} (total: {})", row, m_ZombiesSpawned);
+    LOG_DEBUG("Zombie spawned in row {} (total: {}/{})",
+              row, m_ZombiesSpawned, m_TotalZombiesToSpawn);
 }
 
 void App::UpdateZombies() {
@@ -378,8 +427,9 @@ void App::CheckWinLose() {
     }
 
     // Win: all zombies spawned and none alive
-    if (m_ZombiesSpawned >= ZOMBIES_PER_LEVEL && m_Zombies.empty()) {
-        LOG_DEBUG("Level Complete! All zombies defeated.");
+    if (m_ZombiesSpawned >= m_TotalZombiesToSpawn && m_Zombies.empty()) {
+        LOG_DEBUG("Level {} Complete! All zombies defeated.",
+                  m_CurrentLevel + 1);
         
         m_EndTimer = 0;
         m_Phase = Phase::LEVEL_COMPLETE;

@@ -56,6 +56,7 @@ private:
         READY_ANIM,
         GAMEPLAY,
         LEVEL_COMPLETE,
+        REWARD_SCREEN,
         LEVEL_FADE_IN,
         GAME_OVER,
     };
@@ -148,6 +149,11 @@ private:
 
     // End-game UI
     std::shared_ptr<Util::GameObject> m_EndScreen;
+    std::shared_ptr<Util::GameObject> m_RewardBackground;
+    std::shared_ptr<Util::GameObject> m_RewardPlant;
+    std::shared_ptr<Util::GameObject> m_RewardButton;
+    std::shared_ptr<Util::GameObject> m_RewardTextTitle;
+    std::shared_ptr<Util::GameObject> m_RewardTextDesc;
     int m_EndTimer = 0;
     static constexpr int END_SCREEN_DURATION = 180;
 

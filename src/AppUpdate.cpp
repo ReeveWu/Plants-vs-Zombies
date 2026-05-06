@@ -153,13 +153,24 @@ void App::Update() {
                                 titleStr = "REPEATER";
                                 descStr = "Fires two peas at a time";
                                 break;
+                            case 9:
+                                cardFile = RESOURCE_DIR "/Background/shovel.png";
+                                titleStr = "SHOVEL";
+                                descStr = "Digs up plants to make\nroom for new ones";
+                                break;
                         }
                         
                         m_RewardPlant = std::make_shared<Util::GameObject>(
                             std::make_shared<Util::Image>(cardFile), 91.0f);
                         // Position slightly adjusted to visually fit into the green slot of win_card.png
                         m_RewardPlant->m_Transform.translation = {0.0f, 125.0f};
-                        m_RewardPlant->m_Transform.scale = {0.9f, 0.9f};
+                        
+                        if (rewardId == 9) {
+                            m_RewardPlant->m_Transform.scale = {1.5f, 1.5f}; // Adjust the shovel scale here if needed
+                        } else {
+                            m_RewardPlant->m_Transform.scale = {0.9f, 0.9f};
+                        }
+                        
                         m_Root.AddChild(m_RewardPlant);
 
                         m_RewardTextTitle = std::make_shared<Util::GameObject>(

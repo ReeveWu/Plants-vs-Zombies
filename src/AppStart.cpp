@@ -74,6 +74,21 @@ void App::InitLevel() {
     // Card bar
     InitCards();
 
+    // Shovel
+    if (m_CurrentLevel >= 4) {
+        m_ShovelSlot = std::make_shared<Util::GameObject>(
+            std::make_shared<Util::Image>(RESOURCE_DIR "/Background/shovelslot.png"), 55.0f);
+        m_ShovelSlot->m_Transform.translation = {150.0f, 310.0f}; // Adjust depending on your list.png width
+        m_Root.AddChild(m_ShovelSlot);
+
+        m_ShovelIcon = std::make_shared<Util::GameObject>(
+            std::make_shared<Util::Image>(RESOURCE_DIR "/Background/shovel.png"), 56.0f);
+        m_ShovelIcon->m_Transform.translation = {150.0f, 310.0f};
+        m_ShovelIcon->m_Transform.scale = {0.8f, 0.8f};
+        m_Root.AddChild(m_ShovelIcon);
+    }
+    m_IsHoldingShovel = false;
+
     // Camera intro
     m_CameraOffset = CAMERA_IDLE_OFFSET;
     m_CameraState = CameraState::PAN_RIGHT;
@@ -116,6 +131,14 @@ void App::ClearLevel() {
     if (m_SunCounter) {
         m_Root.RemoveChild(m_SunCounter);
         m_SunCounter = nullptr;
+    }
+    if (m_ShovelSlot) {
+        m_Root.RemoveChild(m_ShovelSlot);
+        m_ShovelSlot = nullptr;
+    }
+    if (m_ShovelIcon) {
+        m_Root.RemoveChild(m_ShovelIcon);
+        m_ShovelIcon = nullptr;
     }
     for (auto& card : m_Cards) m_Root.RemoveChild(card);
     m_Cards.clear();

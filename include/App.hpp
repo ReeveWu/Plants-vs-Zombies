@@ -118,6 +118,11 @@ private:
     std::shared_ptr<Plant> m_HoldingPlant;
     int m_HoldingCardIndex = -1;
 
+    // Shovel system
+    std::shared_ptr<Util::GameObject> m_ShovelSlot;
+    std::shared_ptr<Util::GameObject> m_ShovelIcon;
+    bool m_IsHoldingShovel = false;
+
     // Level system
     int m_CurrentLevel = 0;
     std::vector<int> m_ActiveLanes;

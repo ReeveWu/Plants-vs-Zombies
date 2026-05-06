@@ -48,6 +48,12 @@ void App::UpdateGameplay() {
         m_HoldingPlant->m_Transform.translation = cursor;
     }
 
+    // Update holding shovel position to follow cursor
+    if (m_IsHoldingShovel && m_ShovelIcon) {
+        auto cursor = Util::Input::GetCursorPosition();
+        m_ShovelIcon->m_Transform.translation = cursor;
+    }
+
     // Handle left click
     if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
         auto click = Util::Input::GetCursorPosition();
@@ -60,24 +66,49 @@ void App::UpdateGameplay() {
                 && IsActiveLane(row)) {
                 PlacePlant(row, col);
             }
+        } else if (m_IsHoldingShovel) {
+            glm::vec2 worldPos = click - glm::vec2{m_CameraOffset, 0.0f};
+            auto [row, col] = GridSystem::PositionToCell(worldPos);
+
+            if (GridSystem::IsValidCell(row, col) && m_PlantGrid[row][col]) {
+                m_Root.RemoveChild(m_PlantGrid[row][col]);
+                m_PlantGrid[row][col] = nullptr;
+                LOG_DEBUG("Dug up plant at ({}, {})", row, col);
+                
+                m_IsHoldingShovel = false;
+                if (m_ShovelIcon) {
+                    m_ShovelIcon->m_Transform.translation = {150.0f, 310.0f}; // Reset position
+                }
+            }
         } else {
             for (auto& sun : m_Suns) {
                 if (sun->TryCollect(click)) break;
             }
-            for (auto& card : m_Cards) {
-                if (card->ContainsPoint(click) && card->IsAvailable(m_SunAmount)) {
-                    m_SelectedCard = card;
-                    m_HoldingCardIndex = card->GetIndex();
+            if (m_ShovelIcon && !m_IsHoldingShovel) {
+                // Check if clicking shovel icon on UI
+                glm::vec2 shovelPos = {150.0f, 310.0f};
+                float dist = glm::length(click - shovelPos);
+                if (dist < 30.0f) { // Approximate hitbox radius
+                    m_IsHoldingShovel = true;
+                    LOG_DEBUG("Picked up shovel");
+                }
+            }
+            if (!m_IsHoldingShovel) {
+                for (auto& card : m_Cards) {
+                    if (card->ContainsPoint(click) && card->IsAvailable(m_SunAmount)) {
+                        m_SelectedCard = card;
+                        m_HoldingCardIndex = card->GetIndex();
 
-                    m_HoldingPlant = CreatePlant(
-                        card->GetIndex(), -1, -1);
-                    m_HoldingPlant->SetZIndex(90);
-                    m_HoldingPlant->m_Transform.translation = click;
-                    m_Root.AddChild(m_HoldingPlant);
+                        m_HoldingPlant = CreatePlant(
+                            card->GetIndex(), -1, -1);
+                        m_HoldingPlant->SetZIndex(90);
+                        m_HoldingPlant->m_Transform.translation = click;
+                        m_Root.AddChild(m_HoldingPlant);
 
-                    LOG_DEBUG("Picked up plant {} (cost: {})",
-                              card->GetIndex(), card->GetCost());
-                    break;
+                        LOG_DEBUG("Picked up plant {} (cost: {})",
+                                card->GetIndex(), card->GetCost());
+                        break;
+                    }
                 }
             }
         }
@@ -87,6 +118,11 @@ void App::UpdateGameplay() {
     if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_RB)) {
         if (m_HoldingPlant) {
             CancelHolding();
+        } else if (m_IsHoldingShovel) {
+            m_IsHoldingShovel = false;
+            if (m_ShovelIcon) {
+                m_ShovelIcon->m_Transform.translation = {150.0f, 310.0f};
+            }
         }
     }
 

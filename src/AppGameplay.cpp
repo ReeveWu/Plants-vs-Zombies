@@ -77,7 +77,7 @@ void App::UpdateGameplay() {
                 
                 m_IsHoldingShovel = false;
                 if (m_ShovelIcon) {
-                    m_ShovelIcon->m_Transform.translation = {150.0f, 310.0f}; // Reset position
+                    m_ShovelIcon->m_Transform.translation = {39.0f, 315.6f}; // Reset position
                 }
             }
         } else {
@@ -86,9 +86,9 @@ void App::UpdateGameplay() {
             }
             if (m_ShovelIcon && !m_IsHoldingShovel) {
                 // Check if clicking shovel icon on UI
-                glm::vec2 shovelPos = {150.0f, 310.0f};
+                glm::vec2 shovelPos = {39.0f, 315.6f};
                 float dist = glm::length(click - shovelPos);
-                if (dist < 30.0f) { // Approximate hitbox radius
+                if (dist < 45.0f) { // Slightly larger hitbox for scaled shovel
                     m_IsHoldingShovel = true;
                     LOG_DEBUG("Picked up shovel");
                 }
@@ -121,7 +121,7 @@ void App::UpdateGameplay() {
         } else if (m_IsHoldingShovel) {
             m_IsHoldingShovel = false;
             if (m_ShovelIcon) {
-                m_ShovelIcon->m_Transform.translation = {150.0f, 310.0f};
+                m_ShovelIcon->m_Transform.translation = {39.0f, 309.6f};
             }
         }
     }

@@ -78,13 +78,14 @@ void App::InitLevel() {
     if (m_CurrentLevel >= 4) {
         m_ShovelSlot = std::make_shared<Util::GameObject>(
             std::make_shared<Util::Image>(RESOURCE_DIR "/Background/shovelslot.png"), 55.0f);
-        m_ShovelSlot->m_Transform.translation = {150.0f, 310.0f}; // Adjust depending on your list.png width
+        m_ShovelSlot->m_Transform.scale = {1.41f, 1.41f};
+        m_ShovelSlot->m_Transform.translation = {39.0f, 315.6f};
         m_Root.AddChild(m_ShovelSlot);
 
         m_ShovelIcon = std::make_shared<Util::GameObject>(
             std::make_shared<Util::Image>(RESOURCE_DIR "/Background/shovel.png"), 56.0f);
-        m_ShovelIcon->m_Transform.translation = {150.0f, 310.0f};
-        m_ShovelIcon->m_Transform.scale = {0.8f, 0.8f};
+        m_ShovelIcon->m_Transform.scale = {1.15f, 1.15f};
+        m_ShovelIcon->m_Transform.translation = {39.0f, 315.6f};
         m_Root.AddChild(m_ShovelIcon);
     }
     m_IsHoldingShovel = false;

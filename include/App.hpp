@@ -154,6 +154,8 @@ private:
 
     // End-game UI
     std::shared_ptr<Util::GameObject> m_EndScreen;
+    std::shared_ptr<AnimatedCharacter> m_TransitionFadeOut;
+    std::shared_ptr<AnimatedCharacter> m_TransitionFadeIn;
     std::shared_ptr<Util::GameObject> m_RewardBackground;
     std::shared_ptr<Util::GameObject> m_RewardPlant;
     std::shared_ptr<Util::GameObject> m_RewardButton;

@@ -59,30 +59,16 @@ void App::Update() {
 
     case Phase::LEVEL_COMPLETE:
         if (!m_EndScreen) {
-            std::vector<std::string> transitionPaths;
-            for (int i = 0; i <= 99; ++i) {
-                transitionPaths.push_back(RESOURCE_DIR "/LevelCompleted/win/transition/" + std::to_string(i) + ".png");
-            }
-            
-            m_EndScreen = std::make_shared<AnimatedCharacter>(
-                transitionPaths,
-                false, // play = false (pause initially to wait out the loading spike)
-                10,   // interval = 10ms
-                false // looping = false
-            );
-            m_EndScreen->SetZIndex(100.0f);
-            m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+            m_EndScreen = m_TransitionFadeOut;
             m_Root.AddChild(m_EndScreen);
             m_EndTimer = 0;
+            
+            // Note: Since AnimatedCharacter might maintain its previous state, we MUST pause and let it replay upon Play()
         } else {
             m_EndTimer++;
             auto anim = std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen);
             
-            // Wait 2 frames for DeltaTime to stabilize after heavy image loading
-            if (m_EndTimer <= 2) {
-                break;
-            }
-            
+            // Delay has been removed since images are preloaded
             if (anim) {
                 if (!anim->IsPlaying() && !anim->IfAnimationEnds()) {
                     anim->Play();
@@ -90,15 +76,10 @@ void App::Update() {
                     m_Root.RemoveChild(m_EndScreen);
                     m_EndScreen = nullptr;
 
-                    // Create fade-in overlay (reverse transition: white → transparent)
-                    std::vector<std::string> fadeInPaths;
-                    for (int i = 99; i >= 0; --i) {
-                        fadeInPaths.push_back(
-                            RESOURCE_DIR "/LevelCompleted/win/transition/"
-                            + std::to_string(i) + ".png");
-                    }
-
                     if (GetAllLevels()[m_CurrentLevel].rewardPlant != 0) {
+                        // 切換到獎勵畫面，清空前一個階段（遊戲階段）的所有物件
+                        ClearLevel();
+
                         // Show reward screen instead of immediate next level
                         m_RewardBackground = std::make_shared<Util::GameObject>(
                             std::make_shared<Util::Image>(
@@ -192,10 +173,7 @@ void App::Update() {
                         m_RewardButton->m_Transform.translation = {0.0f, -285.0f};
                         m_Root.AddChild(m_RewardButton);
 
-                        m_EndScreen = std::make_shared<AnimatedCharacter>(
-                            fadeInPaths, false, 10, false);
-                        m_EndScreen->SetZIndex(100.0f);
-                        m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+                        m_EndScreen = m_TransitionFadeIn;
                         m_Root.AddChild(m_EndScreen);
                         m_EndTimer = 0;
                         m_Phase = Phase::REWARD_SCREEN;
@@ -208,10 +186,7 @@ void App::Update() {
                         } else {
                             InitLevel();
 
-                            m_EndScreen = std::make_shared<AnimatedCharacter>(
-                                fadeInPaths, false, 10, false);
-                            m_EndScreen->SetZIndex(100.0f);
-                            m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+                            m_EndScreen = m_TransitionFadeIn;
                             m_Root.AddChild(m_EndScreen);
                             m_EndTimer = 0;
                             m_Phase = Phase::LEVEL_FADE_IN;
@@ -225,7 +200,6 @@ void App::Update() {
     case Phase::REWARD_SCREEN: {
         m_EndTimer++;
         auto anim = std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen);
-        if (m_EndTimer <= 2) break;
 
         if (anim) {
             if (!anim->IsPlaying() && !anim->IfAnimationEnds()) {
@@ -271,16 +245,7 @@ void App::Update() {
                     InitLevel();
 
                     // To make it smooth, let's just fade-in again for the next level
-                    std::vector<std::string> fadeInPaths;
-                    for (int i = 99; i >= 0; --i) {
-                        fadeInPaths.push_back(
-                            RESOURCE_DIR "/LevelCompleted/win/transition/"
-                            + std::to_string(i) + ".png");
-                    }
-                    m_EndScreen = std::make_shared<AnimatedCharacter>(
-                        fadeInPaths, false, 10, false);
-                    m_EndScreen->SetZIndex(100.0f);
-                    m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+                    m_EndScreen = m_TransitionFadeIn;
                     m_Root.AddChild(m_EndScreen);
                     m_EndTimer = 0;
                     m_Phase = Phase::LEVEL_FADE_IN;
@@ -295,7 +260,7 @@ void App::Update() {
         m_EndTimer++;
         auto anim = std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen);
 
-        if (m_EndTimer <= 2) break;
+        // Delay has been removed since images are preloaded
 
         if (anim) {
             if (!anim->IsPlaying() && !anim->IfAnimationEnds()) {

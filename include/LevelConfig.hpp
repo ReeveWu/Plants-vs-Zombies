@@ -30,8 +30,8 @@ inline const std::array<LevelConfig, 15>& GetAllLevels() {
     static const std::array<LevelConfig, 15> levels = {{
         // Level  1: 1 lane, peashooter only
         {1, {1}, 5, 0, 0, 0, 900, 0, {}, 2},
-        // Level  2: 3 lanes, +sunflower, 20s delay
-        {3, {1, 2}, 10, 0, 0, 0, 720, 1200, {}, 3},
+        // Level  2: 3 lanes, +sunflower, 8s delay
+        {3, {1, 2}, 10, 0, 0, 0, 720, 480, {}, 3},
         // Level  3: 3 lanes, +cherrybomb
         {3, {1, 2, 3}, 12, 2, 0, 0, 660, 0, {}, 4},
         // Level  4: 5 lanes, +wallnut, 1 wave

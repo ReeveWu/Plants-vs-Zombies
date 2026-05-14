@@ -198,6 +198,28 @@ void App::Start() {
     
     m_Root.AddChild(m_StartMenuButton);
 
+    // 預先載入轉場動畫以避免切換遊戲階段時卡頓
+    std::vector<std::string> fadeOutPaths;
+    std::vector<std::string> fadeInPaths;
+    for (int i = 0; i <= 99; ++i) {
+        fadeOutPaths.push_back(RESOURCE_DIR "/LevelCompleted/win/transition/" + std::to_string(i) + ".png");
+    }
+    for (int i = 99; i >= 0; --i) {
+        fadeInPaths.push_back(RESOURCE_DIR "/LevelCompleted/win/transition/" + std::to_string(i) + ".png");
+    }
+    
+    m_TransitionFadeOut = std::make_shared<AnimatedCharacter>(
+        fadeOutPaths,
+        false, 10, false);
+    m_TransitionFadeOut->SetZIndex(100.0f);
+    m_TransitionFadeOut->m_Transform.translation = {0.0f, 0.0f};
+
+    m_TransitionFadeIn = std::make_shared<AnimatedCharacter>(
+        fadeInPaths,
+        false, 10, false);
+    m_TransitionFadeIn->SetZIndex(100.0f);
+    m_TransitionFadeIn->m_Transform.translation = {0.0f, 0.0f};
+
     m_Phase = Phase::MAIN_MENU;
     m_CurrentState = State::UPDATE;
 }

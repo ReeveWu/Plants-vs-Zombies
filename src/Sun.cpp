@@ -19,7 +19,13 @@ Sun::Sun(const glm::vec2& target)
     auto anim = std::make_shared<Util::Animation>(
         GetFramePaths(), true, 100, true, 0);
     SetDrawable(anim);
-    SetZIndex(90);
+    
+    // 微調 Z-index 避免多個太陽重疊時破圖（Z-fighting）
+    static float zOffset1 = 0.0f;
+    SetZIndex(90.0f + zOffset1);
+    zOffset1 += 0.001f;
+    if (zOffset1 > 0.1f) zOffset1 = 0.0f;
+
     m_Transform.scale = {0.8f, 0.8f};
     m_Transform.translation = {target.x, 400.0f};
     m_State = State::FALLING;
@@ -32,7 +38,13 @@ Sun::Sun(const glm::vec2& plantPos, bool)
     auto anim = std::make_shared<Util::Animation>(
         GetFramePaths(), true, 100, true, 0);
     SetDrawable(anim);
-    SetZIndex(90);
+
+    // 微調 Z-index 避免多個太陽重疊時破圖（Z-fighting）
+    static float zOffset2 = 0.0f;
+    SetZIndex(90.0f + zOffset2);
+    zOffset2 += 0.001f;
+    if (zOffset2 > 0.1f) zOffset2 = 0.0f;
+
     m_Transform.scale = {0.8f, 0.8f};
     m_Transform.translation = {plantPos.x, plantPos.y + 20.0f};
     m_State = State::FALLING;

@@ -41,7 +41,6 @@ void App::Update() {
 
     case Phase::INTRO_CAMERA:
         UpdateCamera();
-        InitLawnMowers();
         break;
 
     case Phase::READY_ANIM:
@@ -60,6 +59,7 @@ void App::Update() {
     case Phase::LEVEL_COMPLETE:
         if (!m_EndScreen) {
             m_EndScreen = m_TransitionFadeOut;
+            std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen)->Play();
             m_Root.AddChild(m_EndScreen);
             m_EndTimer = 0;
             
@@ -70,9 +70,7 @@ void App::Update() {
             
             // Delay has been removed since images are preloaded
             if (anim) {
-                if (!anim->IsPlaying() && !anim->IfAnimationEnds()) {
-                    anim->Play();
-                } else if (anim->IfAnimationEnds()) {
+                if (anim->IfAnimationEnds()) {
                     m_Root.RemoveChild(m_EndScreen);
                     m_EndScreen = nullptr;
 
@@ -174,6 +172,7 @@ void App::Update() {
                         m_Root.AddChild(m_RewardButton);
 
                         m_EndScreen = m_TransitionFadeIn;
+                        std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen)->Play();
                         m_Root.AddChild(m_EndScreen);
                         m_EndTimer = 0;
                         m_Phase = Phase::REWARD_SCREEN;
@@ -187,6 +186,7 @@ void App::Update() {
                             InitLevel();
 
                             m_EndScreen = m_TransitionFadeIn;
+                            std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen)->Play();
                             m_Root.AddChild(m_EndScreen);
                             m_EndTimer = 0;
                             m_Phase = Phase::LEVEL_FADE_IN;
@@ -202,9 +202,7 @@ void App::Update() {
         auto anim = std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen);
 
         if (anim) {
-            if (!anim->IsPlaying() && !anim->IfAnimationEnds()) {
-                anim->Play();
-            } else if (anim->IfAnimationEnds()) {
+            if (anim->IfAnimationEnds()) {
                 // Fade-in finished. Wait for user to click to proceed.
                 m_Root.RemoveChild(m_EndScreen);
                 m_EndScreen = nullptr;
@@ -246,6 +244,7 @@ void App::Update() {
 
                     // To make it smooth, let's just fade-in again for the next level
                     m_EndScreen = m_TransitionFadeIn;
+                    std::dynamic_pointer_cast<AnimatedCharacter>(m_EndScreen)->Play();
                     m_Root.AddChild(m_EndScreen);
                     m_EndTimer = 0;
                     m_Phase = Phase::LEVEL_FADE_IN;
@@ -263,9 +262,7 @@ void App::Update() {
         // Delay has been removed since images are preloaded
 
         if (anim) {
-            if (!anim->IsPlaying() && !anim->IfAnimationEnds()) {
-                anim->Play();
-            } else if (anim->IfAnimationEnds()) {
+            if (anim->IfAnimationEnds()) {
                 m_Root.RemoveChild(m_EndScreen);
                 m_EndScreen = nullptr;
                 m_Phase = Phase::INTRO_CAMERA;

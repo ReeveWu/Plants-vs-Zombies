@@ -59,6 +59,8 @@ void App::InitLevel() {
     m_ActiveLanes = GetActiveLanes(level.lanes);
 
     m_Background = std::make_shared<Background>(level.lanes);
+    // 預設與 m_CameraOffset (= CAMERA_IDLE_OFFSET) 保持一致，避免第一幀畫面閃爍跳動
+    m_Background->m_Transform.translation.x = App::CAMERA_IDLE_OFFSET;
     m_Root.AddChild(m_Background);
 
     m_CardBarBackground = std::make_shared<Util::GameObject>(
@@ -118,6 +120,8 @@ void App::InitLevel() {
     m_FlagRemaining = level.flagCount;
     m_WaveIndex = 0;
     m_WaveBurstRemaining = 0;
+
+    InitLawnMowers();
 }
 
 void App::ClearLevel() {

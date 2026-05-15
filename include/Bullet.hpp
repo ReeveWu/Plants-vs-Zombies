@@ -15,6 +15,11 @@ public:
               21.0f),
           m_Damage(damage), m_IsIce(isIce) {
         m_Transform.translation = startPos;
+        
+        static float zOffset = 0.0f;
+        SetZIndex(21.0f + zOffset);
+        zOffset += 0.001f;
+        if (zOffset > 1.0f) zOffset = 0.0f;
     }
 
     bool IsIce() const { return m_IsIce; }

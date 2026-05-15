@@ -46,4 +46,11 @@ void App::UpdateCamera() {
     }
 
     m_Background->m_Transform.translation.x = m_CameraOffset;
+    
+    // 同步更新除草機的 X 座標以符合相機偏移
+    for (auto& mower : m_LawnMowers) {
+        if (mower) {
+            mower->m_Transform.translation.x = LAWNMOWER_X + m_CameraOffset;
+        }
+    }
 }

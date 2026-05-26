@@ -7,6 +7,7 @@ cmake_policy(SET CMP0135 NEW)
 
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
+set(BUILD_TESTING OFF CACHE BOOL "Disable dependency-provided tests" FORCE)
 
 FetchContent_Declare(
     ptsd
@@ -58,3 +59,23 @@ target_link_libraries(${PROJECT_NAME}
     SDL2::SDL2main
     PTSD
 )
+
+enable_testing()
+file(WRITE "${CMAKE_BINARY_DIR}/CTestCustom.cmake"
+    "set(CTEST_CUSTOM_TESTS_IGNORE\n  Tests_NOT_BUILT\n)\n")
+
+add_executable(RefactorLogicTests
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/RefactorLogicTest.cpp
+    ${SRC_DIR}/AnimatedCharacter.cpp
+    ${SRC_DIR}/PlantCatalog.cpp
+    ${SRC_DIR}/ZombieFactory.cpp
+    ${SRC_DIR}/ZombieSpawner.cpp
+)
+
+target_compile_definitions(RefactorLogicTests PRIVATE RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/Resources")
+target_include_directories(RefactorLogicTests SYSTEM PRIVATE ${DEPENDENCY_INCLUDE_DIRS})
+target_include_directories(RefactorLogicTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/PTSD/include)
+target_include_directories(RefactorLogicTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(RefactorLogicTests PRIVATE PTSD)
+
+add_test(NAME RefactorLogicTests COMMAND RefactorLogicTests)

@@ -2,6 +2,7 @@
 #define CHOMPER_HPP
 
 #include "Plant.hpp"
+#include "Zombie.hpp"
 
 #include <string>
 #include <vector>
@@ -14,6 +15,31 @@ public:
         : Plant(MakeFrames("chomper", 13), 7, row, col, 300, 100) {}
 
     ChompState GetChompState() const { return m_ChompState; }
+
+    void UpdateBehavior(const PlantUpdateContext& context,
+                        std::vector<PlantAction>& actions) override {
+        Update();
+
+        if (!CanChomp()) return;
+
+        std::shared_ptr<Zombie> target;
+        float bestDist = 1e9f;
+        float plantX = m_Transform.translation.x;
+        for (const auto& zombie : context.zombies) {
+            if (!zombie->IsAlive() || zombie->GetRow() != m_Row) continue;
+            if (!zombie->IsEating()) continue;
+            float dx = zombie->GetX() - plantX;
+            if (dx >= -10.0f && dx < bestDist) {
+                bestDist = dx;
+                target = zombie;
+            }
+        }
+
+        if (target) {
+            StartBite();
+            actions.push_back(PlantAction::EatZombie(target));
+        }
+    }
 
     void Update() {
         switch (m_ChompState) {

@@ -3,6 +3,7 @@
 
 #include "Plant.hpp"
 #include "Util/Image.hpp"
+#include "Zombie.hpp"
 
 #include <string>
 #include <vector>
@@ -16,6 +17,28 @@ public:
 
     MineState GetMineState() const { return m_MineState; }
     bool IsDone() const { return m_MineState == MineState::DONE; }
+
+    void UpdateBehavior(const PlantUpdateContext& context,
+                        std::vector<PlantAction>& actions) override {
+        Update();
+
+        if (m_MineState == MineState::READY) {
+            for (const auto& zombie : context.zombies) {
+                if (!zombie->IsAlive() || zombie->GetRow() != m_Row) continue;
+                float dx = zombie->GetX() - m_Transform.translation.x;
+                if (dx >= -10.0f && dx <= 40.0f) {
+                    Explode();
+                    actions.push_back(
+                        PlantAction::DamageZombie(zombie, EXPLODE_DAMAGE));
+                    break;
+                }
+            }
+        }
+
+        if (IsDone()) {
+            actions.push_back(PlantAction::RemovePlant(m_Row, m_Col));
+        }
+    }
 
     void Update() {
         switch (m_MineState) {

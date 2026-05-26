@@ -2,6 +2,7 @@
 #define CHERRY_BOMB_HPP
 
 #include "Plant.hpp"
+#include "Zombie.hpp"
 
 #include <string>
 #include <vector>
@@ -15,6 +16,33 @@ public:
 
     BombState GetBombState() const { return m_BombState; }
     bool IsDone() const { return m_BombState == BombState::DONE; }
+
+    void UpdateBehavior(const PlantUpdateContext& context,
+                        std::vector<PlantAction>& actions) override {
+        Update();
+
+        if (ShouldApplyDamage()) {
+            SetZIndex(20);
+            float centerX = m_Transform.translation.x;
+            float halfRange = 1.5f * GridSystem::CELL_WIDTH;
+            for (const auto& zombie : context.zombies) {
+                if (!zombie->IsAlive()) continue;
+                int zombieRow = zombie->GetRow();
+                if (zombieRow < GetMinRow() || zombieRow > GetMaxRow()) {
+                    continue;
+                }
+                if (zombie->GetX() >= centerX - halfRange &&
+                    zombie->GetX() <= centerX + halfRange) {
+                    actions.push_back(PlantAction::DamageZombie(
+                        zombie, EXPLODE_DAMAGE, true));
+                }
+            }
+        }
+
+        if (IsDone()) {
+            actions.push_back(PlantAction::RemovePlant(m_Row, m_Col));
+        }
+    }
 
     void Update() {
         switch (m_BombState) {

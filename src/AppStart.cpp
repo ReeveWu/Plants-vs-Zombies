@@ -1,30 +1,14 @@
 #include "App.hpp"
 
+#include "CardSlot.hpp"
+#include "Plant.hpp"
+#include "SunCounter.hpp"
+#include "Zombie.hpp"
 #include "Util/Logger.hpp"
 
 #include "Util/Image.hpp"
 
 void App::InitCards() {
-    // Plant data: cost, cooldown frames, card image, CD image
-    const PlantInfo plantData[] = {
-        {100, 450, RESOURCE_DIR "/Card/bright/peashooter.png",
-                    RESOURCE_DIR "/Card/dark/peashooter.png"},
-        { 50, 450, RESOURCE_DIR "/Card/bright/sunflower.png",
-                    RESOURCE_DIR "/Card/dark/sunflower.png"},
-        {150, 2000, RESOURCE_DIR "/Card/bright/cherrybomb.png",
-                    RESOURCE_DIR "/Card/dark/cherrybomb.png"},
-        { 50, 1800, RESOURCE_DIR "/Card/bright/wallnut.png",
-                    RESOURCE_DIR "/Card/dark/wallnut.png"},
-        { 25, 1800, RESOURCE_DIR "/Card/bright/mine.png",
-                    RESOURCE_DIR "/Card/dark/mine.png"},
-        {175, 450, RESOURCE_DIR "/Card/bright/iceshooter.png",
-                    RESOURCE_DIR "/Card/dark/iceshooter.png"},
-        {150, 450, RESOURCE_DIR "/Card/bright/chomper.png",
-                    RESOURCE_DIR "/Card/dark/chomper.png"},
-        {200, 450, RESOURCE_DIR "/Card/bright/fastshooter.png",
-                    RESOURCE_DIR "/Card/dark/fastshooter.png"},
-    };
-
     constexpr float startX = -500.0f;
     constexpr float spacing = 64.0f;
     constexpr float y = 310.0f;
@@ -33,9 +17,10 @@ void App::InitCards() {
     const auto& level = GetAllLevels()[m_CurrentLevel];
     int slot = 0;
     for (int plantType : level.availablePlants) {
+        PlantType type = ToPlantType(plantType);
         glm::vec2 pos = {startX + spacing * slot, y};
         auto card = std::make_shared<CardSlot>(
-            plantType, plantData[plantType - 1], pos);
+            type, PlantCatalog::Get(type), pos);
         m_Cards.push_back(card);
         m_Root.AddChild(card);
         ++slot;
@@ -72,6 +57,7 @@ void App::InitLevel() {
     // Sun counter
     m_SunCounter = std::make_shared<SunCounter>();
     m_Root.AddChild(m_SunCounter);
+    m_SunSystem.Reset(50, m_SunCounter);
 
     // Card bar
     InitCards();
@@ -98,30 +84,17 @@ void App::InitLevel() {
     m_CameraTimer = 0;
     m_Phase = Phase::INTRO_CAMERA;
     m_ReadyAnim = nullptr;
-    m_SunAmount = 50;
-    m_SunSpawnTimer = 0;
     m_SelectedCard = nullptr;
     m_HoldingPlant = nullptr;
     m_HoldingCardIndex = -1;
-    m_PlantGrid = {};
+    m_PlantGrid.Clear();
     m_Zombies.clear();
-    m_ZombieSpawnTimer = 0;
-    m_ZombiesSpawned = 0;
-    m_Bullets.clear();
+    m_ProjectileSystem.Clear(m_Root);
     m_DeathAnims.clear();
 
     // Level-specific spawn setup
-    m_TotalZombiesToSpawn = level.TotalZombies();
-    m_SpawnInterval = level.spawnIntervalFrames;
-    m_InitialDelayTimer = level.initialDelayFrames;
-    m_NormalRemaining = level.normalCount;
-    m_ConeheadRemaining = level.coneheadCount;
-    m_BucketRemaining = level.bucketCount;
-    m_FlagRemaining = level.flagCount;
-    m_WaveIndex = 0;
-    m_WaveBurstRemaining = 0;
-
-    InitLawnMowers();
+    m_ZombieSpawner.Reset(level);
+    m_LawnMowerSystem.Init(m_ActiveLanes, m_CameraOffset, m_Root);
 }
 
 void App::ClearLevel() {
@@ -147,15 +120,9 @@ void App::ClearLevel() {
     }
     for (auto& card : m_Cards) m_Root.RemoveChild(card);
     m_Cards.clear();
-    for (auto& sun : m_Suns) m_Root.RemoveChild(sun);
-    m_Suns.clear();
-    for (int r = 0; r < GridSystem::ROWS; ++r) {
-        for (int c = 0; c < GridSystem::COLS; ++c) {
-            if (m_PlantGrid[r][c]) {
-                m_Root.RemoveChild(m_PlantGrid[r][c]);
-                m_PlantGrid[r][c] = nullptr;
-            }
-        }
+    m_SunSystem.Clear(m_Root);
+    for (const auto& plant : m_PlantGrid.Clear()) {
+        m_Root.RemoveChild(plant);
     }
     if (m_HoldingPlant) {
         m_Root.RemoveChild(m_HoldingPlant);
@@ -163,13 +130,10 @@ void App::ClearLevel() {
     }
     for (auto& z : m_Zombies) m_Root.RemoveChild(z);
     m_Zombies.clear();
-    for (auto& b : m_Bullets) m_Root.RemoveChild(b);
-    m_Bullets.clear();
+    m_ProjectileSystem.Clear(m_Root);
     for (auto& d : m_DeathAnims) m_Root.RemoveChild(d);
     m_DeathAnims.clear();
-    for (auto& m : m_LawnMowers) {
-        if (m) { m_Root.RemoveChild(m); m = nullptr; }
-    }
+    m_LawnMowerSystem.Clear(m_Root);
     if (m_ReadyAnim) {
         m_Root.RemoveChild(m_ReadyAnim);
         m_ReadyAnim = nullptr;

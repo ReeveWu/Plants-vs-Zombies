@@ -8,31 +8,22 @@
 #include "AnimatedCharacter.hpp"
 #include "Background.hpp"
 #include "LevelConfig.hpp"
-#include "Bullet.hpp"
-#include "CardSlot.hpp"
-#include "GridSystem.hpp"
-#include "LawnMower.hpp"
-#include "BucketZombie.hpp"
-#include "ConeheadZombie.hpp"
-#include "FlagZombie.hpp"
-#include "NormalZombie.hpp"
-#include "Plant.hpp"
-#include "Peashooter.hpp"
-#include "IceShooter.hpp"
-#include "FastShooter.hpp"
-#include "Sunflower.hpp"
-#include "Wallnut.hpp"
-#include "PotatoMine.hpp"
-#include "CherryBomb.hpp"
-#include "Chomper.hpp"
-#include "Sun.hpp"
-#include "SunCounter.hpp"
+#include "LawnMowerSystem.hpp"
+#include "PlantAction.hpp"
+#include "PlantCatalog.hpp"
+#include "PlantGrid.hpp"
+#include "ProjectileSystem.hpp"
+#include "SunSystem.hpp"
+#include "ZombieSpawner.hpp"
 #include "ZombieCorpse.hpp"
 
 #include "Util/GameObject.hpp"
 #include "Util/Text.hpp"
 
-#include <array>
+class CardSlot;
+class Plant;
+class SunCounter;
+class Zombie;
 
 class App {
 public:
@@ -70,26 +61,19 @@ private:
 
     void UpdateCamera();
     void UpdateGameplay();
-    void SpawnSkySun();
     void InitCards();
     void InitLevel();
     void PlacePlant(int row, int col);
     void CancelHolding();
-    void SpawnZombie();
     void UpdateZombies();
-    void UpdateBullets();
-    void UpdatePlantShooting();
-    void UpdatePlantSunProduction();
+    void UpdatePlantBehaviors();
+    void ApplyPlantActions(const std::vector<PlantAction>& actions);
     void UpdateZombieEating();
-    void UpdateLawnMowers();
-    void InitLawnMowers();
-    void UpdateSpecialPlants();
     void CheckWinLose();
     void ClearLevel();
     bool IsActiveLane(int row) const;
     void UpdateDeathAnims();
     void SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie);
-    std::shared_ptr<Plant> CreatePlant(int typeIndex, int row, int col);
 
 private:
     State m_CurrentState = State::START;
@@ -104,17 +88,15 @@ private:
     std::shared_ptr<AnimatedCharacter> m_ReadyAnim;
 
     // Sun system
-    std::vector<std::shared_ptr<Sun>> m_Suns;
+    SunSystem m_SunSystem;
     std::shared_ptr<SunCounter> m_SunCounter;
-    int m_SunAmount = 50;
-    int m_SunSpawnTimer = 0;
 
     // Card system
     std::vector<std::shared_ptr<CardSlot>> m_Cards;
     std::shared_ptr<CardSlot> m_SelectedCard;
 
     // Plant grid & drag state
-    std::array<std::array<std::shared_ptr<Plant>, GridSystem::COLS>, GridSystem::ROWS> m_PlantGrid{};
+    PlantGrid m_PlantGrid;
     std::shared_ptr<Plant> m_HoldingPlant;
     int m_HoldingCardIndex = -1;
 
@@ -124,33 +106,22 @@ private:
     bool m_IsHoldingShovel = false;
 
     // Level system
-    int m_CurrentLevel = 0;
+    int m_CurrentLevel = 5;
     std::vector<int> m_ActiveLanes;
-    int m_TotalZombiesToSpawn = 0;
-    int m_SpawnInterval = 600;
-    int m_InitialDelayTimer = 0;
-    int m_NormalRemaining = 0;
-    int m_ConeheadRemaining = 0;
-    int m_BucketRemaining = 0;
-    int m_FlagRemaining = 0;
-    int m_WaveIndex = 0;
-    int m_WaveBurstRemaining = 0;
 
     // Zombie system
+    ZombieSpawner m_ZombieSpawner;
     std::vector<std::shared_ptr<Zombie>> m_Zombies;
-    int m_ZombieSpawnTimer = 0;
-    int m_ZombiesSpawned = 0;
     static constexpr float ZOMBIE_LOSE_X = -600.0f;
 
     // Bullet system
-    std::vector<std::shared_ptr<Bullet>> m_Bullets;
+    ProjectileSystem m_ProjectileSystem;
 
     // Death animation system
     std::vector<std::shared_ptr<ZombieCorpse>> m_DeathAnims;
 
     // LawnMower system
-    std::array<std::shared_ptr<LawnMower>, GridSystem::ROWS> m_LawnMowers{};
-    static constexpr float LAWNMOWER_X = -560.0f;
+    LawnMowerSystem m_LawnMowerSystem;
 
     // End-game UI
     std::shared_ptr<Util::GameObject> m_EndScreen;
@@ -171,7 +142,6 @@ private:
     static constexpr float CAMERA_IDLE_OFFSET = 180.0f;  // play position (house visible)
     static constexpr float CAMERA_PAN_TARGET = -150.0f;  // road-preview position
     static constexpr int CAMERA_PAUSE_FRAMES = 60;
-    static constexpr int SUN_SPAWN_INTERVAL = 300;
     // Start screen objects
     std::shared_ptr<Util::GameObject> m_StartMenuBackground;
     std::shared_ptr<Util::GameObject> m_StartMenuButton;    

@@ -1,25 +1,21 @@
 #ifndef CARD_SLOT_HPP
 #define CARD_SLOT_HPP
 
+#include "PlantCatalog.hpp"
 #include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
 
 #include <glm/glm.hpp>
 #include <string>
 
-struct PlantInfo {
-    int cost;
-    int cooldownFrames;
-    std::string cardImage;
-    std::string cardCDImage;
-};
-
 class CardSlot : public Util::GameObject {
 public:
-    CardSlot(int index, const PlantInfo& info, const glm::vec2& pos)
-        : m_Info(info), m_Index(index) {
-        m_NormalImage = std::make_shared<Util::Image>(info.cardImage);
-        m_CDImage = std::make_shared<Util::Image>(info.cardCDImage);
+    CardSlot(PlantType type, const PlantDefinition& definition,
+             const glm::vec2& pos)
+        : m_Definition(definition), m_Type(type) {
+        m_NormalImage = std::make_shared<Util::Image>(definition.cardImage);
+        m_CDImage =
+            std::make_shared<Util::Image>(definition.cardCooldownImage);
         SetDrawable(m_NormalImage);
         SetZIndex(60);
         m_Transform.scale = {0.45f, 0.45f};
@@ -27,16 +23,17 @@ public:
     }
 
     bool IsAvailable(int currentSun) const {
-        return m_Ready && currentSun >= m_Info.cost;
+        return m_Ready && currentSun >= m_Definition.cost;
     }
 
-    int GetCost() const { return m_Info.cost; }
-    int GetIndex() const { return m_Index; }
+    int GetCost() const { return m_Definition.cost; }
+    int GetIndex() const { return ToPlantTypeId(m_Type); }
+    PlantType GetType() const { return m_Type; }
     bool IsReady() const { return m_Ready; }
 
     void Use() {
         m_Ready = false;
-        m_CooldownTimer = m_Info.cooldownFrames;
+        m_CooldownTimer = m_Definition.cooldownFrames;
         SetDrawable(m_CDImage);
     }
 
@@ -56,8 +53,8 @@ public:
     }
 
 private:
-    PlantInfo m_Info;
-    int m_Index;
+    PlantDefinition m_Definition;
+    PlantType m_Type;
     bool m_Ready = true;
     int m_CooldownTimer = 0;
     std::shared_ptr<Util::Image> m_NormalImage;

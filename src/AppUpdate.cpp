@@ -86,65 +86,17 @@ void App::Update() {
                         m_RewardBackground->m_Transform.translation = {0.0f, 0.0f};
                         m_Root.AddChild(m_RewardBackground);
 
-                        int rewardId = GetAllLevels()[m_CurrentLevel].rewardPlant;
-                        std::string cardFile = RESOURCE_DIR "/Card/bright/peashooter.png";
-                        std::string titleStr = "PEASHOOTER";
-                        std::string descStr = "Shoots peas at the enemy";
-
-                        switch (rewardId) {
-                            case 1: 
-                                cardFile = RESOURCE_DIR "/Card/bright/peashooter.png"; 
-                                titleStr = "PEASHOOTER";
-                                descStr = "Shoots peas at the enemy";
-                                break;
-                            case 2: 
-                                cardFile = RESOURCE_DIR "/Card/bright/sunflower.png"; 
-                                titleStr = "SUNFLOWER";
-                                descStr = "Gives you additional sun";
-                                break;
-                            case 3: 
-                                cardFile = RESOURCE_DIR "/Card/bright/cherrybomb.png"; 
-                                titleStr = "CHERRY BOMB";
-                                descStr = "Blows up all zombies in an\narea";
-                                break;
-                            case 4: 
-                                cardFile = RESOURCE_DIR "/Card/bright/wallnut.png"; 
-                                titleStr = "WALL-NUT";
-                                descStr = "Blocks off zombies and\nprotects your other plants";
-                                break;
-                            case 5: 
-                                cardFile = RESOURCE_DIR "/Card/bright/mine.png"; 
-                                titleStr = "POTATO MINE";
-                                descStr = "Explodes on contact, but\ntakes time to arm itself";
-                                break;
-                            case 6: 
-                                cardFile = RESOURCE_DIR "/Card/bright/iceshooter.png"; 
-                                titleStr = "SNOW PEA";
-                                descStr = "Shoots frozen peas that\ndamage and slow the enemy";
-                                break;
-                            case 7: 
-                                cardFile = RESOURCE_DIR "/Card/bright/chomper.png"; 
-                                titleStr = "CHOMPER";
-                                descStr = "Devours a zombie whole, but\nis vulnerable while chewing";
-                                break;
-                            case 8: 
-                                cardFile = RESOURCE_DIR "/Card/bright/fastshooter.png"; 
-                                titleStr = "REPEATER";
-                                descStr = "Fires two peas at a time";
-                                break;
-                            case 9:
-                                cardFile = RESOURCE_DIR "/Background/shovel.png";
-                                titleStr = "SHOVEL";
-                                descStr = "Digs up plants to make\nroom for new ones";
-                                break;
-                        }
+                        PlantType rewardType =
+                            ToPlantType(GetAllLevels()[m_CurrentLevel].rewardPlant);
+                        const auto& reward = PlantCatalog::Get(rewardType);
                         
                         m_RewardPlant = std::make_shared<Util::GameObject>(
-                            std::make_shared<Util::Image>(cardFile), 91.0f);
+                            std::make_shared<Util::Image>(reward.rewardImage),
+                            91.0f);
                         // Position slightly adjusted to visually fit into the green slot of win_card.png
                         m_RewardPlant->m_Transform.translation = {0.0f, 125.0f};
                         
-                        if (rewardId == 9) {
+                        if (rewardType == PlantType::Shovel) {
                             m_RewardPlant->m_Transform.scale = {1.5f, 1.5f}; // Adjust the shovel scale here if needed
                         } else {
                             m_RewardPlant->m_Transform.scale = {0.9f, 0.9f};
@@ -153,13 +105,13 @@ void App::Update() {
                         m_Root.AddChild(m_RewardPlant);
 
                         m_RewardTextTitle = std::make_shared<Util::GameObject>(
-                            std::make_shared<Util::Text>(RESOURCE_DIR "/Font/Rye-Regular.ttf", 26, titleStr, Util::Color(209, 150, 57)),
+                            std::make_shared<Util::Text>(RESOURCE_DIR "/Font/Rye-Regular.ttf", 26, reward.rewardTitle, Util::Color(209, 150, 57)),
                             92.0f);
                         m_RewardTextTitle->m_Transform.translation = {0.0f, -14.0f};
                         m_Root.AddChild(m_RewardTextTitle);
 
                         m_RewardTextDesc = std::make_shared<Util::GameObject>(
-                            std::make_shared<Util::Text>(RESOURCE_DIR "/Font/CaveatBrush-Regular.ttf", 26, descStr, Util::Color::FromName(Util::Colors::BLACK)),
+                            std::make_shared<Util::Text>(RESOURCE_DIR "/Font/CaveatBrush-Regular.ttf", 26, reward.rewardDescription, Util::Color::FromName(Util::Colors::BLACK)),
                             92.0f);
                         m_RewardTextDesc->m_Transform.translation = {0.0f, -140.0f};
                         m_Root.AddChild(m_RewardTextDesc);
@@ -285,20 +237,4 @@ void App::Update() {
     }
 
     m_Root.Update();
-}
-
-void App::InitLawnMowers() {
-    for (int row = 0; row < GridSystem::ROWS; ++row) {
-        if (m_LawnMowers[row]) {
-            m_Root.RemoveChild(m_LawnMowers[row]);
-            m_LawnMowers[row] = nullptr;
-        }
-        if (!IsActiveLane(row)) continue;
-        float y = GridSystem::CellToPosition(row, 0).y - 20.0f;
-        auto mower = std::make_shared<LawnMower>(
-            glm::vec2{LAWNMOWER_X + m_CameraOffset, y});
-        mower->SetZIndex(5);
-        m_LawnMowers[row] = mower;
-        m_Root.AddChild(mower);
-    }
 }

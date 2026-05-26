@@ -5,7 +5,15 @@ set(SRC_FILES
     AppGameplay.cpp
     AppEnd.cpp
     AnimatedCharacter.cpp
+    LawnMowerSystem.cpp
+    Plant.cpp
+    PlantCatalog.cpp
+    PlantFactory.cpp
+    ProjectileSystem.cpp
     Sun.cpp
+    SunSystem.cpp
+    ZombieFactory.cpp
+    ZombieSpawner.cpp
 )
 
 set(INCLUDE_FILES
@@ -15,10 +23,15 @@ set(INCLUDE_FILES
     Bullet.hpp
     GridSystem.hpp
     LawnMower.hpp
+    LawnMowerSystem.hpp
     BucketZombie.hpp
     ConeheadZombie.hpp
     FlagZombie.hpp
     NormalZombie.hpp
+    PlantAction.hpp
+    PlantCatalog.hpp
+    PlantFactory.hpp
+    PlantGrid.hpp
     Plant.hpp
     Peashooter.hpp
     IceShooter.hpp
@@ -30,9 +43,13 @@ set(INCLUDE_FILES
     Chomper.hpp
     LevelConfig.hpp
     Zombie.hpp
+    ZombieFactory.hpp
+    ZombieSpawner.hpp
     StatusEffect.hpp
     ZombieCorpse.hpp
+    ProjectileSystem.hpp
     Sun.hpp
+    SunSystem.hpp
     SunCounter.hpp
     CardSlot.hpp
 )

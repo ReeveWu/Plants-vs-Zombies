@@ -2,6 +2,8 @@
 #define PLANT_HPP
 
 #include "AnimatedCharacter.hpp"
+#include "PlantAction.hpp"
+#include "PlantCatalog.hpp"
 
 #include <string>
 #include <vector>
@@ -33,6 +35,8 @@ public:
     virtual bool TryProduceSun() { return false; }
     virtual bool IsIce() const { return false; }
     virtual int GetDamage() const { return 0; }
+    virtual void UpdateBehavior(const PlantUpdateContext& context,
+                                std::vector<PlantAction>& actions);
 
     virtual bool TryShoot() {
         if (!CanShoot()) return false;
@@ -45,24 +49,9 @@ public:
     }
 
     static std::vector<std::string> GetFramePaths(int typeIndex) {
-        struct AnimData {
-            const char* dir;
-            int frameCount;
-        };
-
-        static constexpr AnimData DATA[] = {
-            {"peashooter", 24},
-            {"sunflower",  24},
-            {"cherrybomb", 14},
-            {"wallnut",    32},
-            {"mine",       8},
-            {"iceshooter", 15},
-            {"chomper",    13},
-            {"fastshooter", 15},
-        };
-
-        const auto& d = DATA[typeIndex - 1];
-        return MakeFrames(d.dir, d.frameCount);
+        const auto& definition = PlantCatalog::Get(ToPlantType(typeIndex));
+        return MakeFrames(definition.idleDirectory,
+                          definition.idleFrameCount);
     }
 
     static std::vector<std::string> MakeFrames(

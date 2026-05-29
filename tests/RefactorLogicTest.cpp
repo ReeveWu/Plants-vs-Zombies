@@ -1,7 +1,7 @@
-#include "LevelConfig.hpp"
-#include "PlantCatalog.hpp"
-#include "PlantGrid.hpp"
-#include "ZombieSpawner.hpp"
+#include "config/LevelConfig.hpp"
+#include "catalog/PlantCatalog.hpp"
+#include "systems/PlantGrid.hpp"
+#include "systems/ZombieSpawner.hpp"
 
 #include <cassert>
 #include <iostream>

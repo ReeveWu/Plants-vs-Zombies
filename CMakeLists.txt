@@ -33,9 +33,9 @@ list(TRANSFORM INCLUDE_FILES PREPEND ${INCLUDE_DIR}/)
 # file(GLOB_RECURSE HEADER_FILES include/*)
 
 add_executable(${PROJECT_NAME}
-    ${SRC_DIR}/main.cpp
+    ${SRC_DIR}/app/main.cpp
     ${SRC_FILES}
-    ${HEADER_FILES}
+    ${INCLUDE_FILES}
 )
 
 if(MSVC)
@@ -66,10 +66,10 @@ file(WRITE "${CMAKE_BINARY_DIR}/CTestCustom.cmake"
 
 add_executable(RefactorLogicTests
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/RefactorLogicTest.cpp
-    ${SRC_DIR}/AnimatedCharacter.cpp
-    ${SRC_DIR}/PlantCatalog.cpp
-    ${SRC_DIR}/ZombieFactory.cpp
-    ${SRC_DIR}/ZombieSpawner.cpp
+    ${SRC_DIR}/core/AnimatedCharacter.cpp
+    ${SRC_DIR}/catalog/PlantCatalog.cpp
+    ${SRC_DIR}/factory/ZombieFactory.cpp
+    ${SRC_DIR}/systems/ZombieSpawner.cpp
 )
 
 target_compile_definitions(RefactorLogicTests PRIVATE RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/Resources")

@@ -23,7 +23,7 @@ public:
     }
 
     bool IsAvailable(int currentSun) const {
-        return m_Ready && currentSun >= m_Definition.cost;
+        return (m_NoCooldown || m_Ready) && currentSun >= m_Definition.cost;
     }
 
     int GetCost() const { return m_Definition.cost; }
@@ -32,6 +32,12 @@ public:
     bool IsReady() const { return m_Ready; }
 
     void Use() {
+        if (m_NoCooldown) {
+            m_Ready = true;
+            m_CooldownTimer = 0;
+            SetDrawable(m_NormalImage);
+            return;
+        }
         m_Ready = false;
         m_CooldownTimer = m_Definition.cooldownFrames;
         SetDrawable(m_CDImage);
@@ -45,6 +51,15 @@ public:
         }
     }
 
+    void SetNoCooldown(bool enabled) {
+        m_NoCooldown = enabled;
+        if (!m_NoCooldown) return;
+
+        m_Ready = true;
+        m_CooldownTimer = 0;
+        SetDrawable(m_NormalImage);
+    }
+
     bool ContainsPoint(const glm::vec2& point) const {
         glm::vec2 pos = m_Transform.translation;
         float hw = 25.0f, hh = 35.0f;
@@ -56,6 +71,7 @@ private:
     PlantDefinition m_Definition;
     PlantType m_Type;
     bool m_Ready = true;
+    bool m_NoCooldown = false;
     int m_CooldownTimer = 0;
     std::shared_ptr<Util::Image> m_NormalImage;
     std::shared_ptr<Util::Image> m_CDImage;

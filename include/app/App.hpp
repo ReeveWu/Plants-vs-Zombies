@@ -74,6 +74,16 @@ private:
     bool IsActiveLane(int row) const;
     void UpdateDeathAnims();
     void SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie);
+    void HandleCheatKeys();
+    void JumpToLevel(int levelIndex);
+    void RestartCurrentLevel();
+    void CompleteCurrentLevel();
+    void LoseCurrentLevel();
+    void ApplyNoCardCooldown();
+    void ToggleCheatMode();
+    void EnsureCheatOverlay();
+    void UpdateCheatOverlay();
+    void ClearCompletionUi();
 
 private:
     State m_CurrentState = State::START;
@@ -94,6 +104,16 @@ private:
     // Card system
     std::vector<std::shared_ptr<CardSlot>> m_Cards;
     std::shared_ptr<CardSlot> m_SelectedCard;
+    bool m_NoCardCooldown = false;
+
+    // Cheat mode
+    bool m_CheatModeEnabled = false;
+    std::shared_ptr<Util::GameObject> m_CheatOverlay;
+    std::shared_ptr<Util::Text> m_CheatOverlayText;
+    std::string m_CheatOverlayContent;
+    std::shared_ptr<Util::GameObject> m_CheatStatusOverlay;
+    std::shared_ptr<Util::Text> m_CheatStatusText;
+    std::string m_CheatStatusContent;
 
     // Plant grid & drag state
     PlantGrid m_PlantGrid;

@@ -9,6 +9,8 @@
 #include "Util/Color.hpp"
 
 void App::Update() {
+    HandleCheatKeys();
+
     switch (m_Phase) {
     case Phase::MAIN_MENU:
         if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {

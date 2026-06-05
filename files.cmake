@@ -1,6 +1,7 @@
 set(SRC_FILES
     app/AppStart.cpp
     app/AppUpdate.cpp
+    app/AppCheats.cpp
     app/AppCamera.cpp
     app/AppGameplay.cpp
     app/AppEnd.cpp

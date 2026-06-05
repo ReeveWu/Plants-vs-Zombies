@@ -61,6 +61,7 @@ void App::InitLevel() {
 
     // Card bar
     InitCards();
+    ApplyNoCardCooldown();
 
     // Shovel
     if (m_CurrentLevel >= 4) {

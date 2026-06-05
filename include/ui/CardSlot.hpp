@@ -7,6 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <vector>
 
 class CardSlot : public Util::GameObject {
 public:
@@ -16,6 +17,7 @@ public:
         m_NormalImage = std::make_shared<Util::Image>(definition.cardImage);
         m_CDImage =
             std::make_shared<Util::Image>(definition.cardCooldownImage);
+        LoadCooldownImages();
         SetDrawable(m_NormalImage);
         SetZIndex(60);
         m_Transform.scale = {0.45f, 0.45f};
@@ -40,15 +42,20 @@ public:
         }
         m_Ready = false;
         m_CooldownTimer = m_Definition.cooldownFrames;
-        SetDrawable(m_CDImage);
+        m_TotalCooldownTimer = m_Definition.cooldownFrames;
+        SetCooldownDrawable();
     }
 
     void UpdateCooldown() {
         if (m_Ready) return;
-        if (--m_CooldownTimer <= 0) {
+        --m_CooldownTimer;
+        if (m_CooldownTimer <= 0) {
             m_Ready = true;
+            m_TotalCooldownTimer = 0;
             SetDrawable(m_NormalImage);
+            return;
         }
+        SetCooldownDrawable();
     }
 
     void SetNoCooldown(bool enabled) {
@@ -57,6 +64,7 @@ public:
 
         m_Ready = true;
         m_CooldownTimer = 0;
+        m_TotalCooldownTimer = 0;
         SetDrawable(m_NormalImage);
     }
 
@@ -68,13 +76,46 @@ public:
     }
 
 private:
+    void LoadCooldownImages() {
+        if (!m_Definition.isPlant || m_Definition.idleDirectory.empty()) {
+            return;
+        }
+
+        m_CooldownImages.reserve(COOLDOWN_FRAME_COUNT);
+        const std::string dir = std::string(RESOURCE_DIR) + "/Card/cooldown/" +
+                                m_Definition.idleDirectory + "/";
+        for (int i = 0; i < COOLDOWN_FRAME_COUNT; ++i) {
+            const std::string prefix = i < 10 ? "0" : "";
+            m_CooldownImages.push_back(
+                std::make_shared<Util::Image>(
+                    dir + prefix + std::to_string(i) + ".png"));
+        }
+    }
+
+    void SetCooldownDrawable() {
+        if (m_CooldownImages.empty() || m_TotalCooldownTimer <= 0) {
+            SetDrawable(m_CDImage);
+            return;
+        }
+
+        const int elapsed = m_TotalCooldownTimer - m_CooldownTimer;
+        int index = elapsed * (COOLDOWN_FRAME_COUNT - 1) / m_TotalCooldownTimer;
+        if (index < 0) index = 0;
+        if (index >= COOLDOWN_FRAME_COUNT) index = COOLDOWN_FRAME_COUNT - 1;
+        SetDrawable(m_CooldownImages[static_cast<std::size_t>(index)]);
+    }
+
     PlantDefinition m_Definition;
     PlantType m_Type;
     bool m_Ready = true;
     bool m_NoCooldown = false;
     int m_CooldownTimer = 0;
+    int m_TotalCooldownTimer = 0;
     std::shared_ptr<Util::Image> m_NormalImage;
     std::shared_ptr<Util::Image> m_CDImage;
+    std::vector<std::shared_ptr<Util::Image>> m_CooldownImages;
+
+    static constexpr int COOLDOWN_FRAME_COUNT = 60;
 };
 
 #endif // CARD_SLOT_HPP

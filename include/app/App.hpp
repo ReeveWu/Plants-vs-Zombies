@@ -126,7 +126,7 @@ private:
     bool m_IsHoldingShovel = false;
 
     // Level system
-    int m_CurrentLevel = 5;
+    int m_CurrentLevel = 0;
     std::vector<int> m_ActiveLanes;
 
     // Zombie system

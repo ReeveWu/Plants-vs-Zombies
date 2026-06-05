@@ -20,6 +20,8 @@ public:
 
     int GetAmount() const { return m_Amount; }
     void Spend(int amount);
+    void SetUnlimited(bool enabled);
+    bool IsUnlimited() const { return m_Unlimited; }
 
 private:
     void SpawnSkySun(Util::Renderer& root);
@@ -28,9 +30,12 @@ private:
     std::vector<std::shared_ptr<Sun>> m_Suns;
     std::shared_ptr<SunCounter> m_Counter;
     int m_Amount = 50;
+    int m_AmountBeforeUnlimited = 50;
     int m_SpawnTimer = 0;
+    bool m_Unlimited = false;
 
     static constexpr int SKY_SPAWN_INTERVAL = 300;
+    static constexpr int UNLIMITED_AMOUNT = 9999;
 };
 
 #endif // SUN_SYSTEM_HPP

@@ -8,7 +8,12 @@
 void SunSystem::Reset(int initialAmount, std::shared_ptr<SunCounter> counter) {
     m_Suns.clear();
     m_Counter = std::move(counter);
-    m_Amount = initialAmount;
+    if (m_Unlimited) {
+        m_AmountBeforeUnlimited = initialAmount;
+        m_Amount = UNLIMITED_AMOUNT;
+    } else {
+        m_Amount = initialAmount;
+    }
     m_SpawnTimer = 0;
     SyncCounter();
 }
@@ -29,7 +34,9 @@ void SunSystem::Update(Util::Renderer& root) {
             [&](const std::shared_ptr<Sun>& sun) {
                 if (sun->GetState() == Sun::State::DONE) {
                     root.RemoveChild(sun);
-                    m_Amount += Sun::VALUE;
+                    if (!m_Unlimited) {
+                        m_Amount += Sun::VALUE;
+                    }
                     SyncCounter();
                     LOG_DEBUG("Sun collected! Total: {}", m_Amount);
                     return true;
@@ -62,7 +69,24 @@ void SunSystem::Clear(Util::Renderer& root) {
 }
 
 void SunSystem::Spend(int amount) {
+    if (m_Unlimited) {
+        SyncCounter();
+        return;
+    }
     m_Amount -= amount;
+    SyncCounter();
+}
+
+void SunSystem::SetUnlimited(bool enabled) {
+    if (m_Unlimited == enabled) return;
+
+    m_Unlimited = enabled;
+    if (m_Unlimited) {
+        m_AmountBeforeUnlimited = m_Amount;
+        m_Amount = UNLIMITED_AMOUNT;
+    } else {
+        m_Amount = m_AmountBeforeUnlimited;
+    }
     SyncCounter();
 }
 

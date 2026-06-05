@@ -20,6 +20,17 @@ void ZombieSpawner::Reset(const LevelConfig& level) {
     m_Waves = level.waves;
 }
 
+void ZombieSpawner::CompleteAll() {
+    m_NormalRemaining = 0;
+    m_ConeheadRemaining = 0;
+    m_BucketRemaining = 0;
+    m_FlagRemaining = 0;
+    m_WaveIndex = static_cast<int>(m_Waves.size());
+    m_InitialDelayTimer = 0;
+    m_ZombieSpawnTimer = 0;
+    m_Spawned = m_TotalToSpawn;
+}
+
 void ZombieSpawner::Update(const std::vector<int>& activeLanes,
                            float cameraOffset,
                            std::vector<std::shared_ptr<Zombie>>& zombies,

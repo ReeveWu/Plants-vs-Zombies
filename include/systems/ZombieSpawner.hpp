@@ -19,6 +19,7 @@ public:
 
     int GetTotalZombies() const { return m_TotalToSpawn; }
     int GetSpawnedCount() const { return m_Spawned; }
+    void CompleteAll();
     int GetRegularRemaining() const {
         return m_NormalRemaining + m_ConeheadRemaining + m_BucketRemaining;
     }

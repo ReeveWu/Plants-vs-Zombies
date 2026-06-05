@@ -98,6 +98,12 @@ void TestZombieSpawnerCounters() {
     assert(spawner.GetRegularRemaining() == 1);
     assert(spawner.TakeRegularZombieByRoll(0) == ZombieType::Bucket);
     assert(spawner.GetRegularRemaining() == 0);
+
+    spawner.Reset(level);
+    spawner.CompleteAll();
+    assert(spawner.GetSpawnedCount() == spawner.GetTotalZombies());
+    assert(spawner.GetRegularRemaining() == 0);
+    assert(spawner.GetFlagRemaining() == 0);
 }
 
 } // namespace

@@ -1,6 +1,7 @@
 #ifndef CHOMPER_HPP
 #define CHOMPER_HPP
 
+#include "core/GridSystem.hpp"
 #include "entities/Plant.hpp"
 #include "entities/Zombie.hpp"
 
@@ -28,15 +29,17 @@ public:
         for (const auto& zombie : context.zombies) {
             if (!context.IsVisibleToCamera(zombie)) continue;
             if (!zombie->IsAlive() || zombie->GetRow() != m_Row) continue;
+            if (context.IsZombieReserved(zombie)) continue;
             if (!zombie->IsEating()) continue;
             float dx = zombie->GetX() - plantX;
-            if (dx >= -10.0f && dx < bestDist) {
+            if (dx >= CHOMP_MIN_RANGE && dx <= CHOMP_RANGE &&
+                dx < bestDist) {
                 bestDist = dx;
                 target = zombie;
             }
         }
 
-        if (target) {
+        if (context.TryReserveZombie(target)) {
             StartBite();
             actions.push_back(PlantAction::EatZombie(target));
         }
@@ -81,12 +84,13 @@ public:
     }
 
     static constexpr int CHOMP_DAMAGE = 9999;
-    static constexpr float CHOMP_RANGE = 50.0f;
+    static constexpr float CHOMP_MIN_RANGE = -10.0f;
+    static constexpr float CHOMP_RANGE = 2.0f * GridSystem::CELL_WIDTH;
 
 private:
     ChompState m_ChompState = ChompState::IDLE;
     int m_ChewTimer = 0;
-    static constexpr int CHEW_DURATION = 300;
+    static constexpr int CHEW_DURATION = 1800;
 };
 
 #endif // CHOMPER_HPP

@@ -4,15 +4,24 @@
 #include <glm/vec2.hpp>
 
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 class Zombie;
 
 struct PlantUpdateContext {
+    PlantUpdateContext(const std::vector<std::shared_ptr<Zombie>>& zombies,
+                       float cameraRightX);
+
     const std::vector<std::shared_ptr<Zombie>>& zombies;
     float cameraRightX;
 
     bool IsVisibleToCamera(const std::shared_ptr<Zombie>& zombie) const;
+    bool IsZombieReserved(const std::shared_ptr<Zombie>& zombie) const;
+    bool TryReserveZombie(const std::shared_ptr<Zombie>& zombie) const;
+
+private:
+    mutable std::unordered_set<const Zombie*> m_ReservedZombies;
 };
 
 struct PlantAction {

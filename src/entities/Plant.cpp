@@ -2,9 +2,23 @@
 
 #include "entities/Zombie.hpp"
 
+PlantUpdateContext::PlantUpdateContext(
+    const std::vector<std::shared_ptr<Zombie>>& zombies, float cameraRightX)
+    : zombies(zombies), cameraRightX(cameraRightX) {}
+
 bool PlantUpdateContext::IsVisibleToCamera(
     const std::shared_ptr<Zombie>& zombie) const {
     return zombie && zombie->GetX() <= cameraRightX;
+}
+
+bool PlantUpdateContext::IsZombieReserved(
+    const std::shared_ptr<Zombie>& zombie) const {
+    return zombie && m_ReservedZombies.count(zombie.get()) > 0;
+}
+
+bool PlantUpdateContext::TryReserveZombie(
+    const std::shared_ptr<Zombie>& zombie) const {
+    return zombie && m_ReservedZombies.insert(zombie.get()).second;
 }
 
 void Plant::UpdateBehavior(const PlantUpdateContext& context,

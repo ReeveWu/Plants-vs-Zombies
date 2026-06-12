@@ -95,7 +95,12 @@ void ZombieSpawner::SpawnZombie(
     int row = activeLanes[rand() % activeLanes.size()];
     float yPos = GridSystem::CellToPosition(row, GridSystem::COLS - 1).y;
     auto zombie = ZombieFactory::Create(type, row);
-    zombie->SetZIndex(15);
+
+    static float zOffset = 0.0f;
+    zombie->SetZIndex(15.0f + zOffset);
+    zOffset += 0.001f;
+    if (zOffset > 0.1f) zOffset = 0.0f;
+
     zombie->m_Transform.translation = {
         620.0f + cameraOffset + static_cast<float>(rand() % randomOffset),
         yPos};

@@ -24,6 +24,7 @@ public:
 
         if (m_MineState == MineState::READY) {
             for (const auto& zombie : context.zombies) {
+                if (!context.IsVisibleToCamera(zombie)) continue;
                 if (!zombie->IsAlive() || zombie->GetRow() != m_Row) continue;
                 float dx = zombie->GetX() - m_Transform.translation.x;
                 if (dx >= -10.0f && dx <= 40.0f) {

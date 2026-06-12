@@ -7,6 +7,7 @@
 #include "Util/Input.hpp"
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
+#include "config.hpp"
 #include "entities/Zombie.hpp"
 
 #include <algorithm>
@@ -139,7 +140,12 @@ void App::CancelHolding() {
 }
 
 void App::UpdatePlantBehaviors() {
-    PlantUpdateContext context{m_Zombies};
+    constexpr float halfWindowWidth = static_cast<float>(WINDOW_WIDTH) / 2.0f;
+    constexpr float attackLookahead = 80.0f;
+    PlantUpdateContext context{
+        m_Zombies,
+        halfWindowWidth + attackLookahead,
+    };
     std::vector<PlantAction> actions;
 
     m_PlantGrid.ForEachPlant(

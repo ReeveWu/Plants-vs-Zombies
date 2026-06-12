@@ -26,6 +26,7 @@ public:
         float bestDist = 1e9f;
         float plantX = m_Transform.translation.x;
         for (const auto& zombie : context.zombies) {
+            if (!context.IsVisibleToCamera(zombie)) continue;
             if (!zombie->IsAlive() || zombie->GetRow() != m_Row) continue;
             if (!zombie->IsEating()) continue;
             float dx = zombie->GetX() - plantX;

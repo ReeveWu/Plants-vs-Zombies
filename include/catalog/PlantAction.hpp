@@ -10,6 +10,9 @@ class Zombie;
 
 struct PlantUpdateContext {
     const std::vector<std::shared_ptr<Zombie>>& zombies;
+    float cameraRightX;
+
+    bool IsVisibleToCamera(const std::shared_ptr<Zombie>& zombie) const;
 };
 
 struct PlantAction {

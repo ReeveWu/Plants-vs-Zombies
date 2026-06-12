@@ -26,6 +26,7 @@ public:
             float centerX = m_Transform.translation.x;
             float halfRange = 1.5f * GridSystem::CELL_WIDTH;
             for (const auto& zombie : context.zombies) {
+                if (!context.IsVisibleToCamera(zombie)) continue;
                 if (!zombie->IsAlive()) continue;
                 int zombieRow = zombie->GetRow();
                 if (zombieRow < GetMinRow() || zombieRow > GetMaxRow()) {

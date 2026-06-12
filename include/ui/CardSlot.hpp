@@ -58,6 +58,11 @@ public:
         SetCooldownDrawable();
     }
 
+    void UpdateState(int currentSun) {
+        UpdateCooldown();
+        UpdateAffordabilityDrawable(currentSun);
+    }
+
     void SetNoCooldown(bool enabled) {
         m_NoCooldown = enabled;
         if (!m_NoCooldown) return;
@@ -103,6 +108,17 @@ private:
         if (index < 0) index = 0;
         if (index >= COOLDOWN_FRAME_COUNT) index = COOLDOWN_FRAME_COUNT - 1;
         SetDrawable(m_CooldownImages[static_cast<std::size_t>(index)]);
+    }
+
+    void UpdateAffordabilityDrawable(int currentSun) {
+        if (!m_Ready) return;
+
+        if (currentSun < m_Definition.cost) {
+            SetDrawable(m_CDImage);
+            return;
+        }
+
+        SetDrawable(m_NormalImage);
     }
 
     PlantDefinition m_Definition;

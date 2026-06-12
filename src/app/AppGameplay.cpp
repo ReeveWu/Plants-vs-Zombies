@@ -15,7 +15,7 @@ void App::UpdateGameplay() {
     m_SunSystem.Update(m_Root);
 
     for (auto& card : m_Cards) {
-        card->UpdateCooldown();
+        card->UpdateState(m_SunSystem.GetAmount());
     }
 
     if (m_HoldingPlant) {

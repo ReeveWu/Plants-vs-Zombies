@@ -11,6 +11,15 @@
 void App::Update() {
     HandleCheatKeys();
 
+    if (m_GamePausedByCheat) {
+        if (Util::Input::IsKeyUp(Util::Keycode::ESCAPE) ||
+            Util::Input::IfExit()) {
+            m_CurrentState = State::END;
+        }
+        m_Root.Update();
+        return;
+    }
+
     switch (m_Phase) {
     case Phase::MAIN_MENU:
         if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {

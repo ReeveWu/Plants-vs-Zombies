@@ -51,6 +51,11 @@ void App::HandleCheatKeys() {
         return;
     }
 
+    if (Util::Input::IsKeyDown(Util::Keycode::P)) {
+        ToggleCheatPause();
+        return;
+    }
+
     const bool shiftPressed = IsShiftPressed();
     for (const auto& hotkey : LEVEL_KEYS) {
         if (!Util::Input::IsKeyDown(hotkey.key)) continue;
@@ -194,6 +199,7 @@ void App::ToggleCheatMode() {
     if (!m_CheatModeEnabled) {
         m_SunSystem.SetUnlimited(false);
         m_NoCardCooldown = false;
+        m_GamePausedByCheat = false;
         ApplyNoCardCooldown();
     }
 
@@ -203,6 +209,12 @@ void App::ToggleCheatMode() {
     UpdateCheatOverlay();
 
     LOG_DEBUG("Cheat mode {}", m_CheatModeEnabled ? "enabled" : "disabled");
+}
+
+void App::ToggleCheatPause() {
+    m_GamePausedByCheat = !m_GamePausedByCheat;
+    UpdateCheatOverlay();
+    LOG_DEBUG("Cheat pause {}", m_GamePausedByCheat ? "enabled" : "disabled");
 }
 
 void App::EnsureCheatOverlay() {
@@ -236,7 +248,8 @@ void App::UpdateCheatOverlay() {
                << GetAllLevels().size() << "\n"
                << "Unlimited Sun: "
                << (m_SunSystem.IsUnlimited() ? "ON" : "OFF") << "\n"
-               << "No CD: " << (m_NoCardCooldown ? "ON" : "OFF");
+               << "No CD: " << (m_NoCardCooldown ? "ON" : "OFF") << "\n"
+               << "Paused: " << (m_GamePausedByCheat ? "ON" : "OFF");
 
     const std::string statusContent = statusText.str();
     if (statusContent != m_CheatStatusContent) {
@@ -257,7 +270,8 @@ void App::UpdateCheatOverlay() {
              << "1-9/0: Jump 1-10\n"
              << "Shift+1-5: Jump 11-15\n"
              << "F: Win  L: Lose  R: Replay\n"
-             << "U: Sun  C: No CD";
+             << "U: Sun  C: No CD\n"
+             << "P: Pause";
 
     const std::string helpContent = helpText.str();
     if (helpContent != m_CheatOverlayContent) {

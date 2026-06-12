@@ -81,6 +81,7 @@ private:
     void LoseCurrentLevel();
     void ApplyNoCardCooldown();
     void ToggleCheatMode();
+    void ToggleCheatPause();
     void EnsureCheatOverlay();
     void UpdateCheatOverlay();
     void ClearCompletionUi();
@@ -108,6 +109,7 @@ private:
 
     // Cheat mode
     bool m_CheatModeEnabled = false;
+    bool m_GamePausedByCheat = false;
     std::shared_ptr<Util::GameObject> m_CheatOverlay;
     std::shared_ptr<Util::Text> m_CheatOverlayText;
     std::string m_CheatOverlayContent;

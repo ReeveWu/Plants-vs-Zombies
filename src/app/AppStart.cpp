@@ -29,6 +29,7 @@ void App::InitCards() {
 
 void App::InitLevel() {
     LOG_TRACE("InitLevel (level {})", m_CurrentLevel + 1);
+    m_Audio.PlayGameplayMusic();
 
     if (m_StartMenuBackground) {
         m_Root.RemoveChild(m_StartMenuBackground);
@@ -150,6 +151,8 @@ bool App::IsActiveLane(int row) const {
 
 void App::Start() {
     LOG_TRACE("Start");
+    m_Audio.Initialize();
+    m_Audio.PlayMenuMusic();
 
     m_StartMenuBackground = std::make_shared<Util::GameObject>(
         std::make_shared<Util::Image>(RESOURCE_DIR "/Menu/main.png"),

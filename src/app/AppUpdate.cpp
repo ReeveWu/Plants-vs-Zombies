@@ -28,6 +28,7 @@ void App::Update() {
             auto size = m_StartMenuButton->GetScaledSize();
             if (click.x >= pos.x - size.x / 2 && click.x <= pos.x + size.x / 2 &&
                 click.y >= pos.y - size.y / 2 && click.y <= pos.y + size.y / 2) {
+                m_Audio.PlayButtonClick();
                 m_Phase = Phase::MAIN_MENU_FLASH;
                 m_MainMenuFlashTimer = 0;
                 m_MainMenuFlashCount = 0;
@@ -88,6 +89,7 @@ void App::Update() {
                     if (GetAllLevels()[m_CurrentLevel].rewardPlant != 0) {
                         // 切換到獎勵畫面，清空前一個階段（遊戲階段）的所有物件
                         ClearLevel();
+                        m_Audio.PlayMoneyFalls();
 
                         // Show reward screen instead of immediate next level
                         m_RewardBackground = std::make_shared<Util::GameObject>(
@@ -178,6 +180,7 @@ void App::Update() {
                 auto size = m_RewardButton->GetScaledSize();
                 if (click.x >= pos.x - size.x / 2 && click.x <= pos.x + size.x / 2 &&
                     click.y >= pos.y - size.y / 2 && click.y <= pos.y + size.y / 2) {
+                    m_Audio.PlayButtonClick();
                     // Advance to next level
                     m_Root.RemoveChild(m_RewardBackground);
                     m_RewardBackground = nullptr;

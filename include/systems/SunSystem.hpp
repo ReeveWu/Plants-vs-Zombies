@@ -14,7 +14,7 @@ class SunSystem {
 public:
     void Reset(int initialAmount, std::shared_ptr<SunCounter> counter);
     void Update(Util::Renderer& root);
-    void TryCollect(const glm::vec2& click);
+    bool TryCollect(const glm::vec2& click);
     void SpawnPlantSun(const glm::vec2& plantPosition, Util::Renderer& root);
     void Clear(Util::Renderer& root);
 

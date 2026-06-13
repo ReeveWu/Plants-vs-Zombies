@@ -15,7 +15,7 @@ class LawnMowerSystem {
 public:
     void Init(const std::vector<int>& activeLanes, float cameraOffset,
               Util::Renderer& root);
-    void Update(std::vector<std::shared_ptr<Zombie>>& zombies,
+    bool Update(std::vector<std::shared_ptr<Zombie>>& zombies,
                 Util::Renderer& root);
     void SyncCamera(float cameraOffset);
     void Clear(Util::Renderer& root);

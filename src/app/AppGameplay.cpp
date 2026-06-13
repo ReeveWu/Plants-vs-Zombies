@@ -54,13 +54,16 @@ void App::UpdateGameplay() {
                 }
             }
         } else {
-            m_SunSystem.TryCollect(click);
+            if (m_SunSystem.TryCollect(click)) {
+                m_Audio.PlaySunCollect();
+            }
 
             if (m_ShovelIcon && !m_IsHoldingShovel) {
                 glm::vec2 shovelPos = {39.0f, 315.6f};
                 float dist = glm::length(click - shovelPos);
                 if (dist < 45.0f) {
                     m_IsHoldingShovel = true;
+                    m_Audio.PlayGameClick();
                     LOG_DEBUG("Picked up shovel");
                 }
             }
@@ -77,6 +80,7 @@ void App::UpdateGameplay() {
                         m_HoldingPlant->SetZIndex(90);
                         m_HoldingPlant->m_Transform.translation = click;
                         m_Root.AddChild(m_HoldingPlant);
+                        m_Audio.PlayGameClick();
 
                         LOG_DEBUG("Picked up plant {} (cost: {})",
                                   card->GetIndex(), card->GetCost());
@@ -98,12 +102,21 @@ void App::UpdateGameplay() {
         }
     }
 
-    m_ZombieSpawner.Update(m_ActiveLanes, m_CameraOffset, m_Zombies, m_Root);
+    const auto spawnResult = m_ZombieSpawner.Update(
+        m_ActiveLanes, m_CameraOffset, m_Zombies, m_Root);
+    if (spawnResult.shouldAnnounce) {
+        m_Audio.PlayZombiesAreComing();
+    }
     UpdatePlantBehaviors();
-    m_ProjectileSystem.Update(m_Zombies, m_Root);
+    const auto hitPlantTypes = m_ProjectileSystem.Update(m_Zombies, m_Root);
+    for (int sourcePlantType : hitPlantTypes) {
+        m_Audio.PlayZombieHit(sourcePlantType);
+    }
     UpdateZombieEating();
     UpdateZombies();
-    m_LawnMowerSystem.Update(m_Zombies, m_Root);
+    if (m_LawnMowerSystem.Update(m_Zombies, m_Root)) {
+        m_Audio.PlayLawnMower();
+    }
     UpdateDeathAnims();
     CheckWinLose();
 }
@@ -123,6 +136,7 @@ void App::PlacePlant(int row, int col) {
 
     m_SunSystem.Spend(m_SelectedCard->GetCost());
     m_SelectedCard->Use();
+    m_Audio.PlayPlacePlant();
 
     LOG_DEBUG("Placed plant {} at ({}, {}), sun remaining: {}",
               m_HoldingCardIndex, row, col, m_SunSystem.GetAmount());
@@ -161,7 +175,8 @@ void App::ApplyPlantActions(const std::vector<PlantAction>& actions) {
         switch (action.type) {
         case PlantAction::Type::SpawnBullet:
             m_ProjectileSystem.SpawnBullet(action.position, action.row,
-                                           action.damage, action.ice, m_Root);
+                                           action.damage, action.ice,
+                                           action.sourcePlantType, m_Root);
             break;
         case PlantAction::Type::SpawnSun:
             m_SunSystem.SpawnPlantSun(action.position, m_Root);
@@ -179,6 +194,7 @@ void App::ApplyPlantActions(const std::vector<PlantAction>& actions) {
         case PlantAction::Type::EatZombie:
             if (action.zombie && action.zombie->IsAlive()) {
                 action.zombie->MarkEaten();
+                m_Audio.PlayZombieDead();
             }
             break;
         case PlantAction::Type::RemovePlant: {
@@ -188,6 +204,13 @@ void App::ApplyPlantActions(const std::vector<PlantAction>& actions) {
             }
             break;
         }
+        case PlantAction::Type::PlaySound:
+            if (action.sound == PlantAction::Sound::CherryBoom) {
+                m_Audio.PlayCherryBoom();
+            } else if (action.sound == PlantAction::Sound::ZombieBoom) {
+                m_Audio.PlayZombieBoom();
+            }
+            break;
         }
     }
 }
@@ -197,11 +220,16 @@ void App::UpdateZombies() {
         zombie->Update();
     }
 
+    bool playedDeadThisFrame = false;
     m_Zombies.erase(
         std::remove_if(m_Zombies.begin(), m_Zombies.end(),
             [&](const std::shared_ptr<Zombie>& zombie) {
                 if (zombie->IsDead()) {
                     if (!zombie->IsEaten()) {
+                        if (!playedDeadThisFrame) {
+                            m_Audio.PlayZombieDead();
+                            playedDeadThisFrame = true;
+                        }
                         SpawnDeathAnims(zombie);
                     }
                     m_Root.RemoveChild(zombie);
@@ -217,6 +245,8 @@ void App::UpdateZombies() {
 }
 
 void App::UpdateZombieEating() {
+    bool playedChewThisFrame = false;
+
     for (auto& zombie : m_Zombies) {
         if (!zombie->IsAlive()) continue;
 
@@ -233,6 +263,10 @@ void App::UpdateZombieEating() {
                 zombie->StartEat();
 
                 if (zombie->ShouldDealEatDamage()) {
+                    if (!playedChewThisFrame) {
+                        m_Audio.PlayZombieChew();
+                        playedChewThisFrame = true;
+                    }
                     plant->Hurt(zombie->GetEatDamage());
                     if (plant->IsDead()) {
                         auto removed = m_PlantGrid.Remove(row, col);
@@ -279,6 +313,7 @@ void App::CheckWinLose() {
                   m_CurrentLevel + 1);
 
         m_EndTimer = 0;
+        m_Audio.PlayWin();
         m_Phase = Phase::LEVEL_COMPLETE;
     }
 }

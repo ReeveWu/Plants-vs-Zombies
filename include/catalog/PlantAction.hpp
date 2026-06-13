@@ -31,22 +31,33 @@ struct PlantAction {
         DamageZombie,
         EatZombie,
         RemovePlant,
+        PlaySound,
+    };
+
+    enum class Sound {
+        None,
+        CherryBoom,
+        ZombieBoom,
     };
 
     Type type;
+    Sound sound = Sound::None;
     std::shared_ptr<Zombie> zombie = nullptr;
     glm::vec2 position = {0.0f, 0.0f};
     int row = -1;
     int col = -1;
+    int sourcePlantType = -1;
     int damage = 0;
     bool ice = false;
     bool ashDeath = false;
 
     static PlantAction SpawnBullet(glm::vec2 position, int row,
+                                   int sourcePlantType,
                                    int damage, bool ice) {
         PlantAction action{Type::SpawnBullet};
         action.position = position;
         action.row = row;
+        action.sourcePlantType = sourcePlantType;
         action.damage = damage;
         action.ice = ice;
         return action;
@@ -79,6 +90,12 @@ struct PlantAction {
         PlantAction action{Type::RemovePlant};
         action.row = row;
         action.col = col;
+        return action;
+    }
+
+    static PlantAction PlaySound(Sound sound) {
+        PlantAction action{Type::PlaySound};
+        action.sound = sound;
         return action;
     }
 };

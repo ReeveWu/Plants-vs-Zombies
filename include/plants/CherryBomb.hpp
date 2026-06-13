@@ -23,6 +23,8 @@ public:
 
         if (ShouldApplyDamage()) {
             SetZIndex(20);
+            actions.push_back(
+                PlantAction::PlaySound(PlantAction::Sound::CherryBoom));
             float centerX = m_Transform.translation.x;
             float halfRange = 1.5f * GridSystem::CELL_WIDTH;
             for (const auto& zombie : context.zombies) {

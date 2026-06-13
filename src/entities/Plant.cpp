@@ -39,7 +39,7 @@ void Plant::UpdateBehavior(const PlantUpdateContext& context,
             bulletPos.x += 30.0f;
             bulletPos.y += 20.0f;
             actions.push_back(PlantAction::SpawnBullet(
-                bulletPos, m_Row, GetDamage(), IsIce()));
+                bulletPos, m_Row, m_TypeIndex, GetDamage(), IsIce()));
         }
     }
 

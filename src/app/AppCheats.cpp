@@ -150,6 +150,7 @@ void App::CompleteCurrentLevel() {
     m_ProjectileSystem.Clear(m_Root);
     m_ZombieSpawner.CompleteAll();
     m_EndTimer = 0;
+    m_Audio.PlayWin();
     m_Phase = Phase::LEVEL_COMPLETE;
     UpdateCheatOverlay();
 

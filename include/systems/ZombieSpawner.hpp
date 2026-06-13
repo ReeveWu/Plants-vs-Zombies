@@ -10,12 +10,18 @@
 
 class Zombie;
 
+struct ZombieSpawnUpdateResult {
+    int spawnedCount = 0;
+    bool shouldAnnounce = false;
+};
+
 class ZombieSpawner {
 public:
     void Reset(const LevelConfig& level);
-    void Update(const std::vector<int>& activeLanes, float cameraOffset,
-                std::vector<std::shared_ptr<Zombie>>& zombies,
-                Util::Renderer& root);
+    ZombieSpawnUpdateResult Update(
+        const std::vector<int>& activeLanes, float cameraOffset,
+        std::vector<std::shared_ptr<Zombie>>& zombies,
+        Util::Renderer& root);
 
     int GetTotalZombies() const { return m_TotalToSpawn; }
     int GetSpawnedCount() const { return m_Spawned; }
@@ -29,11 +35,11 @@ public:
     bool TakeFlagZombie();
 
 private:
-    void SpawnZombie(ZombieType type, const std::vector<int>& activeLanes,
+    bool SpawnZombie(ZombieType type, const std::vector<int>& activeLanes,
                      float cameraOffset,
                      std::vector<std::shared_ptr<Zombie>>& zombies,
                      Util::Renderer& root, int randomOffset);
-    void SpawnRegularZombie(const std::vector<int>& activeLanes,
+    bool SpawnRegularZombie(const std::vector<int>& activeLanes,
                             float cameraOffset,
                             std::vector<std::shared_ptr<Zombie>>& zombies,
                             Util::Renderer& root);

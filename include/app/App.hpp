@@ -11,6 +11,7 @@
 #include "systems/LawnMowerSystem.hpp"
 #include "catalog/PlantAction.hpp"
 #include "catalog/PlantCatalog.hpp"
+#include "systems/AudioSystem.hpp"
 #include "systems/PlantGrid.hpp"
 #include "systems/ProjectileSystem.hpp"
 #include "systems/SunSystem.hpp"
@@ -116,6 +117,8 @@ private:
     std::shared_ptr<Util::GameObject> m_CheatStatusOverlay;
     std::shared_ptr<Util::Text> m_CheatStatusText;
     std::string m_CheatStatusContent;
+
+    AudioSystem m_Audio;
 
     // Plant grid & drag state
     PlantGrid m_PlantGrid;

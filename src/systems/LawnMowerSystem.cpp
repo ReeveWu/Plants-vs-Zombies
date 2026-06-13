@@ -24,8 +24,10 @@ void LawnMowerSystem::Init(const std::vector<int>& activeLanes,
     }
 }
 
-void LawnMowerSystem::Update(std::vector<std::shared_ptr<Zombie>>& zombies,
+bool LawnMowerSystem::Update(std::vector<std::shared_ptr<Zombie>>& zombies,
                              Util::Renderer& root) {
+    bool triggered = false;
+
     for (int row = 0; row < GridSystem::ROWS; ++row) {
         auto& mower = m_Mowers[row];
         if (!mower) continue;
@@ -35,6 +37,7 @@ void LawnMowerSystem::Update(std::vector<std::shared_ptr<Zombie>>& zombies,
                 if (!zombie->IsAlive() || zombie->GetRow() != row) continue;
                 if (zombie->GetX() <= mower->m_Transform.translation.x + 30.0f) {
                     mower->Trigger();
+                    triggered = true;
                     LOG_DEBUG("LawnMower triggered in row {}", row);
                     break;
                 }
@@ -57,6 +60,8 @@ void LawnMowerSystem::Update(std::vector<std::shared_ptr<Zombie>>& zombies,
             mower = nullptr;
         }
     }
+
+    return triggered;
 }
 
 void LawnMowerSystem::SyncCamera(float cameraOffset) {

@@ -31,30 +31,40 @@ void ZombieSpawner::CompleteAll() {
     m_Spawned = m_TotalToSpawn;
 }
 
-void ZombieSpawner::Update(const std::vector<int>& activeLanes,
-                           float cameraOffset,
-                           std::vector<std::shared_ptr<Zombie>>& zombies,
-                           Util::Renderer& root) {
+ZombieSpawnUpdateResult ZombieSpawner::Update(
+    const std::vector<int>& activeLanes,
+    float cameraOffset,
+    std::vector<std::shared_ptr<Zombie>>& zombies,
+    Util::Renderer& root) {
+    ZombieSpawnUpdateResult result;
+    const int spawnedBeforeUpdate = m_Spawned;
+
+    if (activeLanes.empty()) return result;
+
     if (m_InitialDelayTimer > 0) {
         --m_InitialDelayTimer;
-        return;
+        return result;
     }
 
     if (m_WaveIndex < static_cast<int>(m_Waves.size()) &&
         m_TotalToSpawn > 0) {
         float progress = static_cast<float>(m_Spawned) / m_TotalToSpawn;
         if (progress >= m_Waves[m_WaveIndex].progressThreshold) {
+            bool waveSpawned = false;
             int waveCount = m_Waves[m_WaveIndex].count;
             if (TakeFlagZombie()) {
-                SpawnZombie(ZombieType::Flag, activeLanes, cameraOffset,
-                            zombies, root, 100);
+                waveSpawned = SpawnZombie(ZombieType::Flag, activeLanes,
+                                          cameraOffset, zombies, root, 100);
                 --waveCount;
             }
 
             for (int i = 0; i < waveCount; ++i) {
                 if (GetRegularRemaining() <= 0) break;
-                SpawnRegularZombie(activeLanes, cameraOffset, zombies, root);
+                waveSpawned = SpawnRegularZombie(activeLanes, cameraOffset,
+                                                 zombies, root) ||
+                              waveSpawned;
             }
+            result.shouldAnnounce = waveSpawned;
             ++m_WaveIndex;
         }
     }
@@ -65,6 +75,14 @@ void ZombieSpawner::Update(const std::vector<int>& activeLanes,
         SpawnRegularZombie(activeLanes, cameraOffset, zombies, root);
         m_ZombieSpawnTimer = 0;
     }
+
+    result.spawnedCount = m_Spawned - spawnedBeforeUpdate;
+
+    if (spawnedBeforeUpdate == 0 && result.spawnedCount > 0) {
+        result.shouldAnnounce = true;
+    }
+
+    return result;
 }
 
 ZombieType ZombieSpawner::TakeRegularZombieByRoll(int roll) {
@@ -86,11 +104,11 @@ bool ZombieSpawner::TakeFlagZombie() {
     return true;
 }
 
-void ZombieSpawner::SpawnZombie(
+bool ZombieSpawner::SpawnZombie(
     ZombieType type, const std::vector<int>& activeLanes, float cameraOffset,
     std::vector<std::shared_ptr<Zombie>>& zombies, Util::Renderer& root,
     int randomOffset) {
-    if (activeLanes.empty()) return;
+    if (activeLanes.empty()) return false;
 
     int row = activeLanes[rand() % activeLanes.size()];
     float yPos = GridSystem::CellToPosition(row, GridSystem::COLS - 1).y;
@@ -109,14 +127,15 @@ void ZombieSpawner::SpawnZombie(
     ++m_Spawned;
     LOG_DEBUG("Zombie spawned in row {} (total: {}/{})", row, m_Spawned,
               m_TotalToSpawn);
+    return true;
 }
 
-void ZombieSpawner::SpawnRegularZombie(
+bool ZombieSpawner::SpawnRegularZombie(
     const std::vector<int>& activeLanes, float cameraOffset,
     std::vector<std::shared_ptr<Zombie>>& zombies, Util::Renderer& root) {
     int remaining = GetRegularRemaining();
-    if (remaining <= 0) return;
+    if (remaining <= 0) return false;
     int roll = rand() % remaining;
     ZombieType type = TakeRegularZombieByRoll(roll);
-    SpawnZombie(type, activeLanes, cameraOffset, zombies, root, 60);
+    return SpawnZombie(type, activeLanes, cameraOffset, zombies, root, 60);
 }

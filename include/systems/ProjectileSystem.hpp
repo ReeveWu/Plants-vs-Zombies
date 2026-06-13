@@ -14,9 +14,9 @@ class Zombie;
 class ProjectileSystem {
 public:
     void SpawnBullet(const glm::vec2& position, int row, int damage,
-                     bool ice, Util::Renderer& root);
-    void Update(std::vector<std::shared_ptr<Zombie>>& zombies,
-                Util::Renderer& root);
+                     bool ice, int sourcePlantType, Util::Renderer& root);
+    std::vector<int> Update(std::vector<std::shared_ptr<Zombie>>& zombies,
+                            Util::Renderer& root);
     void Clear(Util::Renderer& root);
 
 private:

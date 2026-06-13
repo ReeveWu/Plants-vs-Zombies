@@ -7,13 +7,14 @@
 class Bullet : public Util::GameObject {
 public:
     explicit Bullet(const glm::vec2& startPos, int damage = 20,
-                    bool isIce = false)
+                    bool isIce = false, int sourcePlantType = -1)
         : GameObject(
               std::make_unique<Util::Image>(
                   isIce ? RESOURCE_DIR "/Bullet/icepea.png"
                         : RESOURCE_DIR "/Bullet/pea.png"),
               21.0f),
-          m_Damage(damage), m_IsIce(isIce) {
+          m_Damage(damage), m_SourcePlantType(sourcePlantType),
+          m_IsIce(isIce) {
         m_Transform.translation = startPos;
         
         static float zOffset = 0.0f;
@@ -37,12 +38,14 @@ public:
     void MarkHit() { m_Hit = true; SetVisible(false); }
 
     int GetDamage() const { return m_Damage; }
+    int GetSourcePlantType() const { return m_SourcePlantType; }
     int GetRow() const { return m_Row; }
     void SetRow(int row) { m_Row = row; }
 
 private:
     static constexpr float SPEED = 4.0f;
     int m_Damage;
+    int m_SourcePlantType;
     int m_Row = -1;
     bool m_Hit = false;
     bool m_IsIce = false;

@@ -7,16 +7,20 @@
 #include <memory>
 
 void ProjectileSystem::SpawnBullet(const glm::vec2& position, int row,
-                                   int damage, bool ice,
+                                   int damage, bool ice, int sourcePlantType,
                                    Util::Renderer& root) {
-    auto bullet = std::make_shared<Bullet>(position, damage, ice);
+    auto bullet = std::make_shared<Bullet>(position, damage, ice,
+                                           sourcePlantType);
     bullet->SetRow(row);
     m_Bullets.push_back(bullet);
     root.AddChild(bullet);
 }
 
-void ProjectileSystem::Update(std::vector<std::shared_ptr<Zombie>>& zombies,
-                              Util::Renderer& root) {
+std::vector<int> ProjectileSystem::Update(
+    std::vector<std::shared_ptr<Zombie>>& zombies,
+    Util::Renderer& root) {
+    std::vector<int> hitPlantTypes;
+
     for (auto& bullet : m_Bullets) {
         bullet->Update();
     }
@@ -32,6 +36,11 @@ void ProjectileSystem::Update(std::vector<std::shared_ptr<Zombie>>& zombies,
                     zombie->ApplyEffect(std::make_unique<FrostEffect>());
                 }
                 bullet->MarkHit();
+                if (std::find(hitPlantTypes.begin(), hitPlantTypes.end(),
+                              bullet->GetSourcePlantType()) ==
+                    hitPlantTypes.end()) {
+                    hitPlantTypes.push_back(bullet->GetSourcePlantType());
+                }
                 break;
             }
         }
@@ -47,6 +56,8 @@ void ProjectileSystem::Update(std::vector<std::shared_ptr<Zombie>>& zombies,
                 return false;
             }),
         m_Bullets.end());
+
+    return hitPlantTypes;
 }
 
 void ProjectileSystem::Clear(Util::Renderer& root) {

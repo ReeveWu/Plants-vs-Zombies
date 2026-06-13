@@ -30,6 +30,8 @@ public:
                 if (dx >= -10.0f && dx <= 40.0f) {
                     Explode();
                     actions.push_back(
+                        PlantAction::PlaySound(PlantAction::Sound::ZombieBoom));
+                    actions.push_back(
                         PlantAction::DamageZombie(zombie, EXPLODE_DAMAGE));
                     break;
                 }

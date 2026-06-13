@@ -46,10 +46,11 @@ void SunSystem::Update(Util::Renderer& root) {
         m_Suns.end());
 }
 
-void SunSystem::TryCollect(const glm::vec2& click) {
+bool SunSystem::TryCollect(const glm::vec2& click) {
     for (auto& sun : m_Suns) {
-        if (sun->TryCollect(click)) break;
+        if (sun->TryCollect(click)) return true;
     }
+    return false;
 }
 
 void SunSystem::SpawnPlantSun(const glm::vec2& plantPosition,

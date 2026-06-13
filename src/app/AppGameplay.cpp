@@ -3,10 +3,12 @@
 #include "ui/CardSlot.hpp"
 #include "entities/Plant.hpp"
 #include "factory/PlantFactory.hpp"
+#include "Util/Color.hpp"
 #include "Util/Image.hpp"
 #include "Util/Input.hpp"
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
+#include "Util/Text.hpp"
 #include "config.hpp"
 #include "entities/Zombie.hpp"
 
@@ -294,14 +296,7 @@ void App::CheckWinLose() {
         if (!m_LawnMowerSystem.HasMower(row) &&
             zombie->IsPastLine(ZOMBIE_LOSE_X + m_CameraOffset)) {
             LOG_DEBUG("Game Over! Zombie reached the house in row {}", row);
-            m_EndScreen = std::make_shared<Util::GameObject>(
-                std::make_shared<Util::Image>(
-                    RESOURCE_DIR "/LevelCompleted/lose/0.png"),
-                100.0f);
-            m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
-            m_Root.AddChild(m_EndScreen);
-            m_EndTimer = 0;
-            m_Phase = Phase::GAME_OVER;
+            ShowGameOverUi();
             return;
         }
     }
@@ -316,6 +311,30 @@ void App::CheckWinLose() {
         m_Audio.PlayWin();
         m_Phase = Phase::LEVEL_COMPLETE;
     }
+}
+
+void App::ShowGameOverUi() {
+    ClearCompletionUi();
+    m_Audio.PlayLose();
+
+    m_EndScreen = std::make_shared<Util::GameObject>(
+        std::make_shared<Util::Image>(
+            RESOURCE_DIR "/LevelCompleted/lose/0.png"),
+        98.0f);
+    m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
+    m_Root.AddChild(m_EndScreen);
+
+    m_GameOverPrompt = std::make_shared<Util::GameObject>(
+        std::make_shared<Util::Text>(
+            RESOURCE_DIR "/Font/Geo-Regular.ttf", 28,
+            "CLICK ANYWHERE TO RETRY",
+            Util::Color(255, 255, 255)),
+        99.0f);
+    m_GameOverPrompt->m_Transform.translation = {0.0f, -285.0f};
+    m_Root.AddChild(m_GameOverPrompt);
+
+    m_EndTimer = 0;
+    m_Phase = Phase::GAME_OVER;
 }
 
 void App::SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie) {

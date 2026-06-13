@@ -4,7 +4,6 @@
 #include "entities/Zombie.hpp"
 #include "ui/CardSlot.hpp"
 #include "Util/Input.hpp"
-#include "Util/Image.hpp"
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 
@@ -175,14 +174,7 @@ void App::LoseCurrentLevel() {
     m_SelectedCard = nullptr;
     m_HoldingCardIndex = -1;
 
-    m_EndScreen = std::make_shared<Util::GameObject>(
-        std::make_shared<Util::Image>(
-            RESOURCE_DIR "/LevelCompleted/lose/0.png"),
-        100.0f);
-    m_EndScreen->m_Transform.translation = {0.0f, 0.0f};
-    m_Root.AddChild(m_EndScreen);
-    m_EndTimer = 0;
-    m_Phase = Phase::GAME_OVER;
+    ShowGameOverUi();
     UpdateCheatOverlay();
 
     LOG_DEBUG("Cheat: lost level {}", m_CurrentLevel + 1);
@@ -312,6 +304,10 @@ void App::ClearCompletionUi() {
     if (m_RewardTextDesc) {
         m_Root.RemoveChild(m_RewardTextDesc);
         m_RewardTextDesc = nullptr;
+    }
+    if (m_GameOverPrompt) {
+        m_Root.RemoveChild(m_GameOverPrompt);
+        m_GameOverPrompt = nullptr;
     }
     m_EndTimer = 0;
 }

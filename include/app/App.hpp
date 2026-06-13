@@ -75,6 +75,7 @@ private:
     bool IsActiveLane(int row) const;
     void UpdateDeathAnims();
     void SpawnDeathAnims(const std::shared_ptr<Zombie>& zombie);
+    void ShowGameOverUi();
     void HandleCheatKeys();
     void JumpToLevel(int levelIndex);
     void RestartCurrentLevel();
@@ -157,6 +158,7 @@ private:
     std::shared_ptr<Util::GameObject> m_RewardButton;
     std::shared_ptr<Util::GameObject> m_RewardTextTitle;
     std::shared_ptr<Util::GameObject> m_RewardTextDesc;
+    std::shared_ptr<Util::GameObject> m_GameOverPrompt;
     int m_EndTimer = 0;
     static constexpr int END_SCREEN_DURATION = 180;
 

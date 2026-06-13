@@ -239,8 +239,8 @@ void App::Update() {
 
     case Phase::GAME_OVER:
         ++m_EndTimer;
-        if (m_EndTimer >= END_SCREEN_DURATION) {
-            m_CurrentState = State::END;
+        if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
+            RestartCurrentLevel();
         }
         break;
     }

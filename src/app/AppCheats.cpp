@@ -67,7 +67,7 @@ void App::HandleCheatKeys() {
         return;
     }
 
-    if (Util::Input::IsKeyDown(Util::Keycode::F)) {
+    if (Util::Input::IsKeyDown(Util::Keycode::W)) {
         CompleteCurrentLevel();
         return;
     }
@@ -262,7 +262,7 @@ void App::UpdateCheatOverlay() {
     helpText << "CHEAT MODE (H: hide)\n"
              << "1-9/0: Jump 1-10\n"
              << "Shift+1-5: Jump 11-15\n"
-             << "F: Win  L: Lose  R: Replay\n"
+             << "W: Win  L: Lose  R: Replay\n"
              << "U: Sun  C: No CD\n"
              << "P: Pause";
 

@@ -84,6 +84,8 @@ private:
     void ApplyNoCardCooldown();
     void ToggleCheatMode();
     void ToggleCheatPause();
+    void EnsureLevelLabel();
+    void UpdateLevelLabel();
     void EnsureCheatOverlay();
     void UpdateCheatOverlay();
     void ClearCompletionUi();
@@ -118,6 +120,9 @@ private:
     std::shared_ptr<Util::GameObject> m_CheatStatusOverlay;
     std::shared_ptr<Util::Text> m_CheatStatusText;
     std::string m_CheatStatusContent;
+    std::shared_ptr<Util::GameObject> m_LevelLabel;
+    std::shared_ptr<Util::Text> m_LevelLabelText;
+    std::string m_LevelLabelContent;
 
     AudioSystem m_Audio;
 

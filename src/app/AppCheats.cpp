@@ -199,6 +199,9 @@ void App::ToggleCheatMode() {
     EnsureCheatOverlay();
     m_CheatOverlay->SetVisible(m_CheatModeEnabled);
     m_CheatStatusOverlay->SetVisible(m_CheatModeEnabled);
+    if (m_LevelLabel) {
+        UpdateLevelLabel();
+    }
     UpdateCheatOverlay();
 
     LOG_DEBUG("Cheat mode {}", m_CheatModeEnabled ? "enabled" : "disabled");

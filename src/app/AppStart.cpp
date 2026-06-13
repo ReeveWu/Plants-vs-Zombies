@@ -6,7 +6,9 @@
 #include "entities/Zombie.hpp"
 #include "Util/Logger.hpp"
 
+#include "Util/Color.hpp"
 #include "Util/Image.hpp"
+#include "Util/Text.hpp"
 
 void App::InitCards() {
     constexpr float startX = -500.0f;
@@ -60,6 +62,8 @@ void App::InitLevel() {
     m_Root.AddChild(m_SunCounter);
     m_SunSystem.Reset(50, m_SunCounter);
 
+    UpdateLevelLabel();
+
     // Card bar
     InitCards();
     ApplyNoCardCooldown();
@@ -112,6 +116,12 @@ void App::ClearLevel() {
         m_Root.RemoveChild(m_SunCounter);
         m_SunCounter = nullptr;
     }
+    if (m_LevelLabel) {
+        m_Root.RemoveChild(m_LevelLabel);
+        m_LevelLabel = nullptr;
+        m_LevelLabelText = nullptr;
+        m_LevelLabelContent.clear();
+    }
     if (m_ShovelSlot) {
         m_Root.RemoveChild(m_ShovelSlot);
         m_ShovelSlot = nullptr;
@@ -147,6 +157,39 @@ bool App::IsActiveLane(int row) const {
         if (lane == row) return true;
     }
     return false;
+}
+
+void App::EnsureLevelLabel() {
+    if (m_LevelLabel) return;
+
+    m_LevelLabelContent = "Level " + std::to_string(m_CurrentLevel + 1);
+    m_LevelLabelText = std::make_shared<Util::Text>(
+        RESOURCE_DIR "/Font/Rye-Regular.ttf", 30, m_LevelLabelContent,
+        Util::Color(139, 69, 19));
+    m_LevelLabel = std::make_shared<Util::GameObject>(
+        m_LevelLabelText, 97.0f);
+    m_LevelLabel->SetPivot({0.0f, 0.0f});
+    m_Root.AddChild(m_LevelLabel);
+}
+
+void App::UpdateLevelLabel() {
+    EnsureLevelLabel();
+
+    const std::string content =
+        "Level " + std::to_string(m_CurrentLevel + 1);
+    if (content != m_LevelLabelContent) {
+        m_LevelLabelContent = content;
+        m_LevelLabelText->SetText(m_LevelLabelContent);
+    }
+
+    constexpr float margin = 24.0f;
+    const glm::vec2 size = m_LevelLabel->GetScaledSize();
+    m_LevelLabel->SetVisible(!m_CheatModeEnabled);
+    m_LevelLabel->SetPivot({0.0f, 0.0f});
+    m_LevelLabel->m_Transform.translation = {
+        640.0f - margin - size.x / 2.0f,
+        360.0f - margin - size.y / 2.0f,
+    };
 }
 
 void App::Start() {

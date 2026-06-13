@@ -11,6 +11,7 @@ set(SRC_FILES
     catalog/PlantCatalog.cpp
     factory/PlantFactory.cpp
     systems/ProjectileSystem.cpp
+    systems/AudioSystem.cpp
     entities/Sun.cpp
     systems/SunSystem.cpp
     factory/ZombieFactory.cpp
@@ -49,6 +50,7 @@ set(INCLUDE_FILES
     systems/StatusEffect.hpp
     entities/ZombieCorpse.hpp
     systems/ProjectileSystem.hpp
+    systems/AudioSystem.hpp
     entities/Sun.hpp
     systems/SunSystem.hpp
     ui/SunCounter.hpp
